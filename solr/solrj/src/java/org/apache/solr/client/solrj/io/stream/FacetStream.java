@@ -99,13 +99,13 @@ public class FacetStream extends TupleStream implements Expressible  {
   
   public FacetStream(StreamExpression expression, StreamFactory factory) throws IOException{   
     // grab all parameters out
-    String collectionName = factory.getValueOperand(expression, 0);
-    List<StreamExpressionNamedParameter> namedParams = factory.getNamedOperands(expression);
-    StreamExpressionNamedParameter bucketExpression = factory.getNamedOperand(expression, "buckets");
-    StreamExpressionNamedParameter bucketSortExpression = factory.getNamedOperand(expression, "bucketSorts");
+    String collectionName = factory.getValueParameter(expression, 0);
+    List<StreamExpressionNamedParameter> namedParams = factory.getNamedParameters(expression);
+    StreamExpressionParameter bucketExpression = factory.getParameter(expression, "buckets");
+    StreamExpressionParameter bucketSortExpression = factory.getParameter(expression, "bucketSorts");
     List<StreamExpression> metricExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, Metric.class);
-    StreamExpressionNamedParameter limitExpression = factory.getNamedOperand(expression, "bucketSizeLimit");
-    StreamExpressionNamedParameter zkHostExpression = factory.getNamedOperand(expression, "zkHost");
+    StreamExpressionParameter limitExpression = factory.getParameter(expression, "bucketSizeLimit");
+    StreamExpressionParameter zkHostExpression = factory.getParameter(expression, "zkHost");
     
     // Validate there are no unknown parameters
     if(expression.getParameters().size() != 1 + namedParams.size() + metricExpressions.size()){
@@ -133,8 +133,8 @@ public class FacetStream extends TupleStream implements Expressible  {
     // buckets, required - comma separated
     Bucket[] buckets = null;
     if(null != bucketExpression){
-      if(bucketExpression.getParameter() instanceof StreamExpressionValue){
-        String[] keys = ((StreamExpressionValue)bucketExpression.getParameter()).getValue().split(",");
+      if(bucketExpression instanceof StreamExpressionValue){
+        String[] keys = ((StreamExpressionValue)bucketExpression).getValue().split(",");
         if(0 != keys.length){
           buckets = new Bucket[keys.length];
           for(int idx = 0; idx < keys.length; ++idx){
@@ -150,8 +150,8 @@ public class FacetStream extends TupleStream implements Expressible  {
     // bucketSorts, required
     FieldComparator[] bucketSorts = null;
     if(null != bucketSortExpression){
-      if(bucketSortExpression.getParameter() instanceof StreamExpressionValue){
-        bucketSorts = parseBucketSorts(((StreamExpressionValue)bucketSortExpression.getParameter()).getValue());
+      if(bucketSortExpression instanceof StreamExpressionValue){
+        bucketSorts = parseBucketSorts(((StreamExpressionValue)bucketSortExpression).getValue());
       }
     }
     if(null == bucketSorts || 0 == bucketSorts.length){      
@@ -167,10 +167,10 @@ public class FacetStream extends TupleStream implements Expressible  {
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - at least one metric expected.",expression,collectionName));
     }
     
-    if(null == limitExpression || null == limitExpression.getParameter() || !(limitExpression.getParameter() instanceof StreamExpressionValue)){
+    if(null == limitExpression || null == limitExpression || !(limitExpression instanceof StreamExpressionValue)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting a single 'limit' parameter of type positive integer but didn't find one",expression));
     }
-    String limitStr = ((StreamExpressionValue)limitExpression.getParameter()).getValue();
+    String limitStr = ((StreamExpressionValue)limitExpression).getValue();
     int limitInt = 0;
     try{
       limitInt = Integer.parseInt(limitStr);
@@ -190,8 +190,8 @@ public class FacetStream extends TupleStream implements Expressible  {
         zkHost = factory.getDefaultZkHost();
       }
     }
-    else if(zkHostExpression.getParameter() instanceof StreamExpressionValue){
-      zkHost = ((StreamExpressionValue)zkHostExpression.getParameter()).getValue();
+    else if(zkHostExpression instanceof StreamExpressionValue){
+      zkHost = ((StreamExpressionValue)zkHostExpression).getValue();
     }
     if(null == zkHost){
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - zkHost not found for collection '%s'",expression,collectionName));

@@ -47,6 +47,7 @@ import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 import org.apache.solr.common.cloud.ClusterState;
@@ -121,10 +122,10 @@ public class CloudSolrStream extends TupleStream implements Expressible {
 
   public CloudSolrStream(StreamExpression expression, StreamFactory factory) throws IOException{   
     // grab all parameters out
-    String collectionName = factory.getValueOperand(expression, 0);
-    List<StreamExpressionNamedParameter> namedParams = factory.getNamedOperands(expression);
-    StreamExpressionNamedParameter aliasExpression = factory.getNamedOperand(expression, "aliases");
-    StreamExpressionNamedParameter zkHostExpression = factory.getNamedOperand(expression, "zkHost");
+    String collectionName = factory.getValueParameter(expression, 0);
+    List<StreamExpressionNamedParameter> namedParams = factory.getNamedParameters(expression);
+    StreamExpressionParameter aliasExpression = factory.getParameter(expression, "aliases");
+    StreamExpressionParameter zkHostExpression = factory.getParameter(expression, "zkHost");
 
     // Collection Name
     if(null == collectionName){
@@ -149,9 +150,9 @@ public class CloudSolrStream extends TupleStream implements Expressible {
     }
 
     // Aliases, optional, if provided then need to split
-    if(null != aliasExpression && aliasExpression.getParameter() instanceof StreamExpressionValue){
+    if(null != aliasExpression && aliasExpression instanceof StreamExpressionValue){
       fieldMappings = new HashMap<>();
-      for(String mapping : ((StreamExpressionValue)aliasExpression.getParameter()).getValue().split(",")){
+      for(String mapping : ((StreamExpressionValue)aliasExpression).getValue().split(",")){
         String[] parts = mapping.trim().split("=");
         if(2 == parts.length){
           fieldMappings.put(parts[0], parts[1]);
@@ -170,8 +171,8 @@ public class CloudSolrStream extends TupleStream implements Expressible {
         zkHost = factory.getDefaultZkHost();
       }
     }
-    else if(zkHostExpression.getParameter() instanceof StreamExpressionValue){
-      zkHost = ((StreamExpressionValue)zkHostExpression.getParameter()).getValue();
+    else if(zkHostExpression instanceof StreamExpressionValue){
+      zkHost = ((StreamExpressionValue)zkHostExpression).getValue();
     }
     if(null == zkHost){
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - zkHost not found for collection '%s'",expression,collectionName));

@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.solr.client.solrj.io.comp.ComparatorOrder;
 import org.apache.solr.client.solrj.io.comp.MultipleFieldComparator;
@@ -42,12 +44,12 @@ import org.apache.solr.client.solrj.io.stream.metrics.Metric;
 public class StreamFactory implements Serializable {
   
   private transient HashMap<String,String> collectionZkHosts;
-  private transient HashMap<String,Class> functionNames;
+  private transient HashMap<String,Class<?>> functionNames;
   private transient String defaultZkHost;
   
   public StreamFactory(){
     collectionZkHosts = new HashMap<String,String>();
-    functionNames = new HashMap<String,Class>();
+    functionNames = new HashMap<String,Class<?>>();
   }
   
   public StreamFactory withCollectionZkHost(String collectionName, String zkHost){
@@ -71,64 +73,131 @@ public class StreamFactory implements Serializable {
     return null;
   }
   
-  public Map<String,Class> getFunctionNames(){
+  public Map<String,Class<?>> getFunctionNames(){
     return functionNames;
   }
-  public StreamFactory withFunctionName(String functionName, Class clazz){
+  public StreamFactory withFunctionName(String functionName, Class<?> clazz){
     this.functionNames.put(functionName, clazz);
     return this;
   }
   
-  public StreamExpressionParameter getOperand(StreamExpression expression, int parameterIndex){
-    if(null == expression.getParameters() || parameterIndex >= expression.getParameters().size()){
+  /**
+   * Given an expression will return parameter at given index, or null if doesn't exist
+   * @param expression expression to look at
+   * @param atIndex index we want parameter for
+   * @return parameter at index, else null
+   */
+  public StreamExpressionParameter getParameter(StreamExpression expression, int atIndex){
+    if(null == expression.getParameters() || atIndex >= expression.getParameters().size()){
       return null;
     }
     
-    return expression.getParameters().get(parameterIndex);
+    return expression.getParameters().get(atIndex);
+  }
+
+  /**
+   * Given an expression will return parameter at given index iff parameter is of the provided types
+   * @param expression expression to look at
+   * @param atIndex index we want parameter for
+   * @param ofTypes types the parameter must be of (all must match)
+   * @return parameter at index of types, else null
+   */
+  public StreamExpressionParameter getParameter(StreamExpression expression, int atIndex, Class<?> ... ofTypes){
+    StreamExpressionParameter parameter = getParameter(expression, atIndex);
+    if(isAssignableToAll(parameter, ofTypes)){
+      return parameter;
+    }
+    
+    return null;
   }
   
-  /** Given an expression, will return the value parameter at the given index, or null if doesn't exist */
-  public String getValueOperand(StreamExpression expression, int parameterIndex){
-    StreamExpressionParameter parameter = getOperand(expression, parameterIndex);
+  /**
+   * Given an expression will return all parameters of the provided types
+   * @param expression expression to consider
+   * @param ofTypes types each parameter must be assignable to (all must match)
+   * @return list of all parameters matching the types
+   */
+  public List<StreamExpressionParameter> getParameters(StreamExpression expression, Class<?> ... ofTypes){
+    return toList(expression.getParameters().stream().filter(item -> isAssignableToAll(item, ofTypes)));
+  }
+
+  /**
+   * Given an expression will return the value parameter at the given index, or null if doesn't exist
+   * @param expression expression to consider
+   * @param atIndex index to find value parameter at
+   * @return value parameter at index, null if not found
+   */
+  public String getValueParameter(StreamExpression expression, int atIndex){
+    StreamExpressionParameter parameter = getParameter(expression, atIndex, StreamExpressionValue.class);
     if(null != parameter){ 
-      if(parameter instanceof StreamExpressionValue){
-        return ((StreamExpressionValue)parameter).getValue();
-      }
+      return ((StreamExpressionValue)parameter).getValue();
     }
     
     return null;
   }
   
-  public List<StreamExpressionNamedParameter> getNamedOperands(StreamExpression expression){
+  /**
+   * Given an expression will return all named parameters
+   * @param expression expression to consider
+   * @return all named parameters in the expression
+   */
+  public List<StreamExpressionNamedParameter> getNamedParameters(StreamExpression expression){
+    return toList(getParameters(expression, StreamExpressionNamedParameter.class).stream().map(StreamExpressionNamedParameter.class::cast));
+  }
+
+  /**
+   * Given an expression will return all parameter with the given name
+   * @param expression expression to consider
+   * @param withName parameter name to find
+   * @return all parameters with given name (empty list of none found)
+   */
+  public List<StreamExpressionParameter> getParameters(StreamExpression expression, String withName){
+    return toList(getNamedParameters(expression).stream().filter(item -> item.getName().equals(withName)).map(StreamExpressionParameter.class::cast));
+  }
+  
+  /**
+   * Given an expression will return parameter with the given name
+   * @param expression expression to consider
+   * @param withName parameter name to find
+   * @return parameter with given name else null if not found
+   * @throws IOException if multiple parameters found with the given name 
+   */
+  public StreamExpressionParameter getParameter(StreamExpression expression, String withName) throws IOException{
+    List<StreamExpressionParameter> namedParameters = getParameters(expression, withName);
+    
+    if(1 == namedParameters.size()){
+      return namedParameters.get(0);
+    }
+    else if(namedParameters.size() > 1){
+      // found more than 1 with name
+      throw new IOException(String.format(Locale.ROOT, "Expected to find a single parameter with name '%s' but found %d", withName, namedParameters.size()));
+    }
+    else{
+      // found none with name
+      return null;
+    }
+  }
+    
+  /**
+   * Given an expression will return all parameters which are themselves expressions
+   * @param expression expression to consider
+   * @return list of all parameters which are themselves expressions
+   */
+  public List<StreamExpression> getExpressionParameters(StreamExpression expression){
+    return toList(getParameters(expression, StreamExpression.class).stream().map(StreamExpression.class::cast));
+  }
+  
+  public List<StreamExpressionNamedParameter> getNamedExpressionOperands(StreamExpression expression){
     List<StreamExpressionNamedParameter> namedParameters = new ArrayList<StreamExpressionNamedParameter>();
-    for(StreamExpressionParameter parameter : getOperandsOfType(expression, StreamExpressionNamedParameter.class)){
+    for(StreamExpressionParameter parameter : getParameters(expression, StreamExpressionNamedParameter.class)){
       namedParameters.add((StreamExpressionNamedParameter)parameter);
-    }
-    
-    return namedParameters;
-  }
-  public StreamExpressionNamedParameter getNamedOperand(StreamExpression expression, String name){
-    List<StreamExpressionNamedParameter> namedParameters = getNamedOperands(expression);
-    for(StreamExpressionNamedParameter param : namedParameters){
-      if(param.getName().equals(name)){
-        return param;
-      }
-    }
-    
-    return null;
-  }
-  
-  public List<StreamExpression> getExpressionOperands(StreamExpression expression){
-    List<StreamExpression> namedParameters = new ArrayList<StreamExpression>();
-    for(StreamExpressionParameter parameter : getOperandsOfType(expression, StreamExpression.class)){
-      namedParameters.add((StreamExpression)parameter);
     }
     
     return namedParameters;
   }
   public List<StreamExpression> getExpressionOperands(StreamExpression expression, String functionName){
     List<StreamExpression> namedParameters = new ArrayList<StreamExpression>();
-    for(StreamExpressionParameter parameter : getOperandsOfType(expression, StreamExpression.class)){
+    for(StreamExpressionParameter parameter : getParameters(expression, StreamExpression.class)){
       StreamExpression expressionOperand = (StreamExpression)parameter;
       if(expressionOperand.getFunctionName().equals(functionName)){
         namedParameters.add(expressionOperand);
@@ -137,26 +206,10 @@ public class StreamFactory implements Serializable {
     
     return namedParameters;
   }
-  public List<StreamExpressionParameter> getOperandsOfType(StreamExpression expression, Class ... clazzes){
-    List<StreamExpressionParameter> parameters = new ArrayList<StreamExpressionParameter>();
-    
-    parameterLoop:
-     for(StreamExpressionParameter parameter : expression.getParameters()){
-      for(Class clazz : clazzes){
-        if(!clazz.isAssignableFrom(parameter.getClass())){
-          continue parameterLoop; // go to the next parameter since this parameter cannot be assigned to at least one of the classes
-        }
-      }
-      
-      parameters.add(parameter);
-    }
-    
-    return parameters;
-  }
   
   public List<StreamExpression> getExpressionOperandsRepresentingTypes(StreamExpression expression, Class ... clazzes){
     List<StreamExpression> matchingStreamExpressions = new ArrayList<StreamExpression>();
-    List<StreamExpression> allStreamExpressions = getExpressionOperands(expression);
+    List<StreamExpression> allStreamExpressions = getExpressionParameters(expression);
     
     parameterLoop:
     for(StreamExpression streamExpression : allStreamExpressions){
@@ -173,7 +226,7 @@ public class StreamFactory implements Serializable {
     
     return matchingStreamExpressions;   
   }
-  
+    
   public TupleStream constructStream(String expressionClause) throws IOException {
     return constructStream(StreamExpressionParser.parse(expressionClause));
   }
@@ -325,8 +378,8 @@ public class StreamFactory implements Serializable {
     }
   }
   
-  public String getFunctionName(Class clazz) throws IOException{
-    for(Entry<String,Class> entry : functionNames.entrySet()){
+  public String getFunctionName(Class<?> clazz) throws IOException{
+    for(Entry<String,Class<?>> entry : functionNames.entrySet()){
       if(entry.getValue() == clazz){
         return entry.getKey();
       }
@@ -346,5 +399,19 @@ public class StreamFactory implements Serializable {
     
     // is a string
     return original;
+  }
+  
+  private <T> List<T> toList(Stream<T> stream){
+    return stream.collect(Collectors.toList());
+  }
+
+  private boolean isAssignableToAll(Object item, Class ... clazzes){
+    for(Class clazz : clazzes){
+      if(!clazz.isAssignableFrom(item.getClass())){
+        return false;
+      }
+    }
+    
+    return true;
   }
 }

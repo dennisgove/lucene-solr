@@ -33,7 +33,7 @@ public class CountMetric extends Metric {
   public CountMetric(StreamExpression expression, StreamFactory factory) throws IOException{
     // grab all parameters out
     String functionName = expression.getFunctionName();
-    String columnName = factory.getValueOperand(expression, 0);
+    String columnName = factory.getValueParameter(expression, 0);
     
     // validate expression contains only what we want.
     if(!"*".equals(columnName)){

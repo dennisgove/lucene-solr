@@ -67,7 +67,7 @@ public class SelectStream extends TupleStream implements Expressible {
   public SelectStream(StreamExpression expression,StreamFactory factory) throws IOException {
     // grab all parameters out
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
-    List<StreamExpressionParameter> selectFieldsExpressions = factory.getOperandsOfType(expression, StreamExpressionValue.class);
+    List<StreamExpressionParameter> selectFieldsExpressions = factory.getParameters(expression, StreamExpressionValue.class);
     List<StreamExpression> operationExpressions = factory.getExpressionOperandsRepresentingTypes(expression, StreamOperation.class);
     
     // validate expression contains only what we want.

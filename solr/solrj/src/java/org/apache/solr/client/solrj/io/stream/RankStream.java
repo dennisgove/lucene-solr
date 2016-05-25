@@ -34,6 +34,7 @@ import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 
@@ -60,18 +61,18 @@ public class RankStream extends TupleStream implements Expressible {
   public RankStream(StreamExpression expression, StreamFactory factory) throws IOException {
     // grab all parameters out
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
-    StreamExpressionNamedParameter nParam = factory.getNamedOperand(expression, "n");
-    StreamExpressionNamedParameter sortExpression = factory.getNamedOperand(expression, "sort");
+    StreamExpressionParameter nParam = factory.getParameter(expression, "n");
+    StreamExpressionParameter sortExpression = factory.getParameter(expression, "sort");
     
     // validate expression contains only what we want.
     if(expression.getParameters().size() != streamExpressions.size() + 2){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - unknown operands found", expression));
     }
     
-    if(null == nParam || null == nParam.getParameter() || !(nParam.getParameter() instanceof StreamExpressionValue)){
+    if(null == nParam || null == nParam || !(nParam instanceof StreamExpressionValue)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting a single 'n' parameter of type positive integer but didn't find one",expression));
     }
-    String nStr = ((StreamExpressionValue)nParam.getParameter()).getValue();
+    String nStr = ((StreamExpressionValue)nParam).getValue();
     int nInt = 0;
     try{
       nInt = Integer.parseInt(nStr);
@@ -85,12 +86,12 @@ public class RankStream extends TupleStream implements Expressible {
     if(1 != streamExpressions.size()){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting a single stream but found %d",expression, streamExpressions.size()));
     }    
-    if(null == sortExpression || !(sortExpression.getParameter() instanceof StreamExpressionValue)){
+    if(null == sortExpression || !(sortExpression instanceof StreamExpressionValue)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting single 'over' parameter listing fields to unique over but didn't find one",expression));
     }
     
     TupleStream stream = factory.constructStream(streamExpressions.get(0));
-    StreamComparator comp = factory.constructComparator(((StreamExpressionValue)sortExpression.getParameter()).getValue(), FieldComparator.class);
+    StreamComparator comp = factory.constructComparator(((StreamExpressionValue)sortExpression).getValue(), FieldComparator.class);
     
     init(stream,nInt,comp);    
   }

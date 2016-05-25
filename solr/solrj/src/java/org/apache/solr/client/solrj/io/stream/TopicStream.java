@@ -45,6 +45,7 @@ import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 import org.apache.solr.client.solrj.request.UpdateRequest;
@@ -131,27 +132,27 @@ public class TopicStream extends CloudSolrStream implements Expressible  {
 
   public TopicStream(StreamExpression expression, StreamFactory factory) throws IOException{
     // grab all parameters out
-    String checkpointCollectionName = factory.getValueOperand(expression, 0);
-    String collectionName = factory.getValueOperand(expression, 1);
-    List<StreamExpressionNamedParameter> namedParams = factory.getNamedOperands(expression);
-    StreamExpressionNamedParameter zkHostExpression = factory.getNamedOperand(expression, "zkHost");
+    String checkpointCollectionName = factory.getValueParameter(expression, 0);
+    String collectionName = factory.getValueParameter(expression, 1);
+    List<StreamExpressionNamedParameter> namedParams = factory.getNamedParameters(expression);
+    StreamExpressionParameter zkHostExpression = factory.getParameter(expression, "zkHost");
 
-    StreamExpressionNamedParameter idParam = factory.getNamedOperand(expression, "id");
+    StreamExpressionParameter idParam = factory.getParameter(expression, "id");
     if(null == idParam) {
       throw new IOException("invalid TopicStream id cannot be null");
     }
 
-    StreamExpressionNamedParameter flParam = factory.getNamedOperand(expression, "fl");
+    StreamExpressionParameter flParam = factory.getParameter(expression, "fl");
 
     if(null == flParam) {
       throw new IOException("invalid TopicStream fl cannot be null");
     }
 
     long checkpointEvery = -1;
-    StreamExpressionNamedParameter checkpointEveryParam = factory.getNamedOperand(expression, "checkpointEvery");
+    StreamExpressionParameter checkpointEveryParam = factory.getParameter(expression, "checkpointEvery");
 
     if(checkpointEveryParam != null) {
-      checkpointEvery = Long.parseLong(((StreamExpressionValue) checkpointEveryParam.getParameter()).getValue());
+      checkpointEvery = Long.parseLong(((StreamExpressionValue) checkpointEveryParam).getValue());
     }
 
     //  Checkpoint Collection Name
@@ -186,8 +187,8 @@ public class TopicStream extends CloudSolrStream implements Expressible  {
         zkHost = factory.getDefaultZkHost();
       }
     }
-    else if(zkHostExpression.getParameter() instanceof StreamExpressionValue){
-      zkHost = ((StreamExpressionValue)zkHostExpression.getParameter()).getValue();
+    else if(zkHostExpression instanceof StreamExpressionValue){
+      zkHost = ((StreamExpressionValue)zkHostExpression).getValue();
     }
     if(null == zkHost){
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - zkHost not found for collection '%s'",expression,collectionName));
@@ -197,7 +198,7 @@ public class TopicStream extends CloudSolrStream implements Expressible  {
     init(zkHost,
         checkpointCollectionName,
         collectionName,
-        ((StreamExpressionValue) idParam.getParameter()).getValue(),
+        ((StreamExpressionValue) idParam).getValue(),
         checkpointEvery,
         params);
   }

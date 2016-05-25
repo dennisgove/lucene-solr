@@ -21,23 +21,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.apache.solr.client.solrj.io.Tuple;
 import org.apache.solr.client.solrj.io.comp.FieldComparator;
 import org.apache.solr.client.solrj.io.comp.StreamComparator;
 import org.apache.solr.client.solrj.io.stream.expr.Explanation;
+import org.apache.solr.client.solrj.io.stream.expr.Explanation.ExpressionType;
 import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
-import org.apache.solr.client.solrj.io.stream.expr.Explanation.ExpressionType;
 import org.apache.solr.common.cloud.ClusterState;
 import org.apache.solr.common.cloud.Replica;
 import org.apache.solr.common.cloud.Slice;
@@ -82,11 +83,11 @@ public class ParallelStream extends CloudSolrStream implements Expressible {
 
   public ParallelStream(StreamExpression expression, StreamFactory factory) throws IOException {
     // grab all parameters out
-    String collectionName = factory.getValueOperand(expression, 0);
-    StreamExpressionNamedParameter workersParam = factory.getNamedOperand(expression, "workers");
+    String collectionName = factory.getValueParameter(expression, 0);
+    StreamExpressionParameter workersParam = factory.getParameter(expression, "workers");
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
-    StreamExpressionNamedParameter sortExpression = factory.getNamedOperand(expression, "sort");
-    StreamExpressionNamedParameter zkHostExpression = factory.getNamedOperand(expression, "zkHost");
+    StreamExpressionParameter sortExpression = factory.getParameter(expression, "sort");
+    StreamExpressionParameter zkHostExpression = factory.getParameter(expression, "zkHost");
     
     // validate expression contains only what we want.
 
@@ -100,10 +101,10 @@ public class ParallelStream extends CloudSolrStream implements Expressible {
     }
 
     // Workers
-    if(null == workersParam || null == workersParam.getParameter() || !(workersParam.getParameter() instanceof StreamExpressionValue)){
+    if(null == workersParam || null == workersParam || !(workersParam instanceof StreamExpressionValue)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting a single 'workersParam' parameter of type positive integer but didn't find one",expression));
     }
-    String workersStr = ((StreamExpressionValue)workersParam.getParameter()).getValue();
+    String workersStr = ((StreamExpressionValue)workersParam).getValue();
     int workersInt = 0;
     try{
       workersInt = Integer.parseInt(workersStr);
@@ -121,7 +122,7 @@ public class ParallelStream extends CloudSolrStream implements Expressible {
     }
     
     // Sort
-    if(null == sortExpression || !(sortExpression.getParameter() instanceof StreamExpressionValue)){
+    if(null == sortExpression || !(sortExpression instanceof StreamExpressionValue)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting single 'sort' parameter telling us how to join the parallel streams but didn't find one",expression));
     }
     
@@ -133,8 +134,8 @@ public class ParallelStream extends CloudSolrStream implements Expressible {
         zkHost = factory.getDefaultZkHost();
       }
     }
-    else if(zkHostExpression.getParameter() instanceof StreamExpressionValue){
-      zkHost = ((StreamExpressionValue)zkHostExpression.getParameter()).getValue();
+    else if(zkHostExpression instanceof StreamExpressionValue){
+      zkHost = ((StreamExpressionValue)zkHostExpression).getValue();
     }
     if(null == zkHost){
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - zkHost not found for collection '%s'",expression,collectionName));
@@ -142,7 +143,7 @@ public class ParallelStream extends CloudSolrStream implements Expressible {
     
     // We've got all the required items    
     TupleStream stream = factory.constructStream(streamExpressions.get(0));
-    StreamComparator comp = factory.constructComparator(((StreamExpressionValue)sortExpression.getParameter()).getValue(), FieldComparator.class);
+    StreamComparator comp = factory.constructComparator(((StreamExpressionValue)sortExpression).getValue(), FieldComparator.class);
     streamFactory = factory;
     init(zkHost,collectionName,stream,workersInt,comp);
   }
