@@ -99,11 +99,11 @@ public class JDBCStream extends TupleStream implements Expressible {
   
   public JDBCStream(StreamExpression expression, StreamFactory factory) throws IOException{
     // grab all parameters out
-    List<StreamExpressionNamedParameter> namedParams = factory.getNamedOperands(expression);
-    StreamExpressionNamedParameter connectionUrlExpression = factory.getNamedOperand(expression, "connection");
-    StreamExpressionNamedParameter sqlQueryExpression = factory.getNamedOperand(expression, "sql");
-    StreamExpressionNamedParameter definedSortExpression = factory.getNamedOperand(expression, "sort");
-    StreamExpressionNamedParameter driverClassNameExpression = factory.getNamedOperand(expression, "driver");
+    List<StreamExpressionNamedParameter> namedParams = factory.getNamedParameters(expression);
+    StreamExpressionParameter connectionUrlExpression = factory.getParameter(expression, "connection");
+    StreamExpressionParameter sqlQueryExpression = factory.getParameter(expression, "sql");
+    StreamExpressionParameter definedSortExpression = factory.getParameter(expression, "sort");
+    StreamExpressionParameter driverClassNameExpression = factory.getParameter(expression, "driver");
     
     // Validate there are no unknown parameters - zkHost and alias are namedParameter so we don't need to count it twice
     if(expression.getParameters().size() != namedParams.size()){
@@ -120,8 +120,8 @@ public class JDBCStream extends TupleStream implements Expressible {
 
     // connectionUrl, required
     String connectionUrl = null;
-    if(null != connectionUrlExpression && connectionUrlExpression.getParameter() instanceof StreamExpressionValue){
-      connectionUrl = ((StreamExpressionValue)connectionUrlExpression.getParameter()).getValue();
+    if(null != connectionUrlExpression && connectionUrlExpression instanceof StreamExpressionValue){
+      connectionUrl = ((StreamExpressionValue)connectionUrlExpression).getValue();
     }
     if(null == connectionUrl){
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - connection not found"));
@@ -129,8 +129,8 @@ public class JDBCStream extends TupleStream implements Expressible {
     
     // sql, required
     String sqlQuery = null;
-    if(null != sqlQueryExpression && sqlQueryExpression.getParameter() instanceof StreamExpressionValue){
-      sqlQuery = ((StreamExpressionValue)sqlQueryExpression.getParameter()).getValue();
+    if(null != sqlQueryExpression && sqlQueryExpression instanceof StreamExpressionValue){
+      sqlQuery = ((StreamExpressionValue)sqlQueryExpression).getValue();
     }
     if(null == sqlQuery){
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - sql not found"));
@@ -138,8 +138,8 @@ public class JDBCStream extends TupleStream implements Expressible {
     
     // definedSort, required
     StreamComparator definedSort = null;
-    if(null != sqlQueryExpression && sqlQueryExpression.getParameter() instanceof StreamExpressionValue){
-      definedSort = factory.constructComparator(((StreamExpressionValue)definedSortExpression.getParameter()).getValue(), FieldComparator.class);
+    if(null != sqlQueryExpression && sqlQueryExpression instanceof StreamExpressionValue){
+      definedSort = factory.constructComparator(((StreamExpressionValue)definedSortExpression).getValue(), FieldComparator.class);
     }
     if(null == definedSort){
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - sort not found"));
@@ -147,8 +147,8 @@ public class JDBCStream extends TupleStream implements Expressible {
     
     // driverClass, optional
     String driverClass = null;
-    if(null != driverClassNameExpression && driverClassNameExpression.getParameter() instanceof StreamExpressionValue){
-      driverClass = ((StreamExpressionValue)driverClassNameExpression.getParameter()).getValue();
+    if(null != driverClassNameExpression && driverClassNameExpression instanceof StreamExpressionValue){
+      driverClass = ((StreamExpressionValue)driverClassNameExpression).getValue();
     }
 
     // We've got all the required items

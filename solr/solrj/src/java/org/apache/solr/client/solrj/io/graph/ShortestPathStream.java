@@ -119,9 +119,9 @@ public class ShortestPathStream extends TupleStream implements Expressible {
 
   public ShortestPathStream(StreamExpression expression, StreamFactory factory) throws IOException {
 
-    String collectionName = factory.getValueOperand(expression, 0);
-    List<StreamExpressionNamedParameter> namedParams = factory.getNamedOperands(expression);
-    StreamExpressionNamedParameter zkHostExpression = factory.getNamedOperand(expression, "zkHost");
+    String collectionName = factory.getValueParameter(expression, 0);
+    List<StreamExpressionNamedParameter> namedParams = factory.getNamedParameters(expression);
+    StreamExpressionParameter zkHostExpression = factory.getParameter(expression, "zkHost");
 
     // Collection Name
     if(null == collectionName) {
@@ -129,32 +129,32 @@ public class ShortestPathStream extends TupleStream implements Expressible {
     }
 
     String fromNode = null;
-    StreamExpressionNamedParameter fromExpression = factory.getNamedOperand(expression, "from");
+    StreamExpressionParameter fromExpression = factory.getParameter(expression, "from");
 
     if(fromExpression == null) {
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - from param is required",expression));
     } else {
-      fromNode = ((StreamExpressionValue)fromExpression.getParameter()).getValue();
+      fromNode = ((StreamExpressionValue)fromExpression).getValue();
     }
 
     String toNode = null;
-    StreamExpressionNamedParameter toExpression = factory.getNamedOperand(expression, "to");
+    StreamExpressionParameter toExpression = factory.getParameter(expression, "to");
 
     if(toExpression == null) {
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - to param is required", expression));
     } else {
-      toNode = ((StreamExpressionValue)toExpression.getParameter()).getValue();
+      toNode = ((StreamExpressionValue)toExpression).getValue();
     }
 
     String fromField = null;
     String toField = null;
 
-    StreamExpressionNamedParameter edgeExpression = factory.getNamedOperand(expression, "edge");
+    StreamExpressionParameter edgeExpression = factory.getParameter(expression, "edge");
 
     if(edgeExpression == null) {
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - edge param is required", expression));
     } else {
-      String edge = ((StreamExpressionValue)edgeExpression.getParameter()).getValue();
+      String edge = ((StreamExpressionValue)edgeExpression).getValue();
       String[] fields = edge.split("=");
       if(fields.length != 2) {
         throw new IOException(String.format(Locale.ROOT,"invalid expression %s - edge param separated by and = and must contain two fields", expression));
@@ -165,28 +165,28 @@ public class ShortestPathStream extends TupleStream implements Expressible {
 
     int threads = 6;
 
-    StreamExpressionNamedParameter threadsExpression = factory.getNamedOperand(expression, "threads");
+    StreamExpressionParameter threadsExpression = factory.getParameter(expression, "threads");
 
     if(threadsExpression != null) {
-      threads = Integer.parseInt(((StreamExpressionValue)threadsExpression.getParameter()).getValue());
+      threads = Integer.parseInt(((StreamExpressionValue)threadsExpression).getValue());
     }
 
     int partitionSize = 250;
 
-    StreamExpressionNamedParameter partitionExpression = factory.getNamedOperand(expression, "partitionSize");
+    StreamExpressionParameter partitionExpression = factory.getParameter(expression, "partitionSize");
 
     if(partitionExpression != null) {
-      partitionSize = Integer.parseInt(((StreamExpressionValue)partitionExpression.getParameter()).getValue());
+      partitionSize = Integer.parseInt(((StreamExpressionValue)partitionExpression).getValue());
     }
 
     int maxDepth = 0;
 
-    StreamExpressionNamedParameter depthExpression = factory.getNamedOperand(expression, "maxDepth");
+    StreamExpressionParameter depthExpression = factory.getParameter(expression, "maxDepth");
 
     if(depthExpression == null) {
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - maxDepth param is required", expression));
     } else {
-      maxDepth = Integer.parseInt(((StreamExpressionValue) depthExpression.getParameter()).getValue());
+      maxDepth = Integer.parseInt(((StreamExpressionValue) depthExpression).getValue());
     }
 
     ModifiableSolrParams params = new ModifiableSolrParams();
@@ -210,8 +210,8 @@ public class ShortestPathStream extends TupleStream implements Expressible {
       if(zkHost == null) {
         zkHost = factory.getDefaultZkHost();
       }
-    } else if(zkHostExpression.getParameter() instanceof StreamExpressionValue) {
-      zkHost = ((StreamExpressionValue)zkHostExpression.getParameter()).getValue();
+    } else if(zkHostExpression instanceof StreamExpressionValue) {
+      zkHost = ((StreamExpressionValue)zkHostExpression).getValue();
     }
 
     if(null == zkHost){

@@ -36,6 +36,7 @@ import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 
@@ -91,7 +92,7 @@ public class ReducerStream extends TupleStream implements Expressible {
   public ReducerStream(StreamExpression expression, StreamFactory factory) throws IOException{
     // grab all parameters out
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
-    StreamExpressionNamedParameter byExpression = factory.getNamedOperand(expression, "by");
+    StreamExpressionParameter byExpression = factory.getParameter(expression, "by");
     List<StreamExpression> operationExpressions = factory.getExpressionOperandsRepresentingTypes(expression, ReduceOperation.class);
 
     // validate expression contains only what we want.
@@ -102,7 +103,7 @@ public class ReducerStream extends TupleStream implements Expressible {
     if(1 != streamExpressions.size()){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting a single stream but found %d",expression, streamExpressions.size()));
     }    
-    if(null == byExpression || !(byExpression.getParameter() instanceof StreamExpressionValue)){
+    if(null == byExpression || !(byExpression instanceof StreamExpressionValue)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting single 'by' parameter listing fields to group by but didn't find one",expression));
     }
 
@@ -120,7 +121,7 @@ public class ReducerStream extends TupleStream implements Expressible {
     }
 
     init(factory.constructStream(streamExpressions.get(0)),
-         factory.constructEqualitor(((StreamExpressionValue) byExpression.getParameter()).getValue(), FieldEqualitor.class),
+         factory.constructEqualitor(((StreamExpressionValue) byExpression).getValue(), FieldEqualitor.class),
          reduceOperation);
   }
   

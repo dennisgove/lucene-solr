@@ -30,6 +30,7 @@ import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 
@@ -55,7 +56,7 @@ public class MergeStream extends TupleStream implements Expressible {
   public MergeStream(StreamExpression expression,StreamFactory factory) throws IOException {
     // grab all parameters out
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
-    StreamExpressionNamedParameter onExpression = factory.getNamedOperand(expression, "on");
+    StreamExpressionParameter onExpression = factory.getParameter(expression, "on");
     
     // validate expression contains only what we want.
     if(expression.getParameters().size() != streamExpressions.size() + 1){
@@ -66,7 +67,7 @@ public class MergeStream extends TupleStream implements Expressible {
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting at least two streams but found %d (must be PushBackStream types)",expression, streamExpressions.size()));
     }
 
-    if(null == onExpression || !(onExpression.getParameter() instanceof StreamExpressionValue)){
+    if(null == onExpression || !(onExpression instanceof StreamExpressionValue)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting single 'on' parameter listing fields to merge on but didn't find one",expression));
     }
     
@@ -75,7 +76,7 @@ public class MergeStream extends TupleStream implements Expressible {
       streams[idx] = factory.constructStream(streamExpressions.get(idx));
     }
     
-    init( factory.constructComparator(((StreamExpressionValue)onExpression.getParameter()).getValue(), FieldComparator.class),
+    init( factory.constructComparator(((StreamExpressionValue)onExpression).getValue(), FieldComparator.class),
           streams
         );
   }

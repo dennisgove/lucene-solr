@@ -36,6 +36,7 @@ import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 import org.apache.solr.common.SolrInputDocument;
@@ -61,7 +62,7 @@ public class UpdateStream extends TupleStream implements Expressible {
 
 
   public UpdateStream(StreamExpression expression, StreamFactory factory) throws IOException {
-    String collectionName = factory.getValueOperand(expression, 0);
+    String collectionName = factory.getValueParameter(expression, 0);
     verifyCollectionName(collectionName, expression);
     
     String zkHost = findZkHost(factory, collectionName, expression);
@@ -208,8 +209,8 @@ public class UpdateStream extends TupleStream implements Expressible {
     }
   }
   
-  private String findZkHost(StreamFactory factory, String collectionName, StreamExpression expression) {
-    StreamExpressionNamedParameter zkHostExpression = factory.getNamedOperand(expression, "zkHost");
+  private String findZkHost(StreamFactory factory, String collectionName, StreamExpression expression) throws IOException {
+    StreamExpressionParameter zkHostExpression = factory.getParameter(expression, "zkHost");
     if(null == zkHostExpression){
       String zkHost = factory.getCollectionZkHost(collectionName);
       if(zkHost == null) {
@@ -217,8 +218,8 @@ public class UpdateStream extends TupleStream implements Expressible {
       } else {
         return zkHost;
       }
-    } else if(zkHostExpression.getParameter() instanceof StreamExpressionValue){
-      return ((StreamExpressionValue)zkHostExpression.getParameter()).getValue();
+    } else if(zkHostExpression instanceof StreamExpressionValue){
+      return ((StreamExpressionValue)zkHostExpression).getValue();
     }
     
     return null;
@@ -231,12 +232,12 @@ public class UpdateStream extends TupleStream implements Expressible {
   }
   
   private int extractBatchSize(StreamExpression expression, StreamFactory factory) throws IOException {
-    StreamExpressionNamedParameter batchSizeParam = factory.getNamedOperand(expression, "batchSize");
-    if(null == batchSizeParam || null == batchSizeParam.getParameter() || !(batchSizeParam.getParameter() instanceof StreamExpressionValue)){
+    StreamExpressionParameter batchSizeParam = factory.getParameter(expression, "batchSize");
+    if(null == batchSizeParam || null == batchSizeParam || !(batchSizeParam instanceof StreamExpressionValue)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting a 'batchSize' parameter of type positive integer but didn't find one",expression));
     }
     
-    String batchSizeStr = ((StreamExpressionValue)batchSizeParam.getParameter()).getValue();
+    String batchSizeStr = ((StreamExpressionValue)batchSizeParam).getValue();
     return parseBatchSize(batchSizeStr, expression);
   }
   

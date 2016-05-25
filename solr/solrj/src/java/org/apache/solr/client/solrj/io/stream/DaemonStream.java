@@ -33,6 +33,7 @@ import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 import org.slf4j.Logger;
@@ -61,9 +62,9 @@ public class DaemonStream extends TupleStream implements Expressible {
 
     TupleStream tupleStream = factory.constructStream(streamExpressions.get(0));
 
-    StreamExpressionNamedParameter idExpression = factory.getNamedOperand(expression, "id");
-    StreamExpressionNamedParameter runExpression = factory.getNamedOperand(expression, "runInterval");
-    StreamExpressionNamedParameter queueExpression = factory.getNamedOperand(expression, "queueSize");
+    StreamExpressionParameter idExpression = factory.getParameter(expression, "id");
+    StreamExpressionParameter runExpression = factory.getParameter(expression, "runInterval");
+    StreamExpressionParameter queueExpression = factory.getParameter(expression, "queueSize");
 
     String id = null;
     long runInterval = 0L;
@@ -72,17 +73,17 @@ public class DaemonStream extends TupleStream implements Expressible {
     if(idExpression == null) {
       throw new IOException("Invalid expression id parameter expected");
     } else {
-      id = ((StreamExpressionValue) idExpression.getParameter()).getValue();
+      id = ((StreamExpressionValue) idExpression).getValue();
     }
 
     if(runExpression == null) {
       runInterval = 2000;
     } else {
-      runInterval = Long.parseLong(((StreamExpressionValue) runExpression.getParameter()).getValue());
+      runInterval = Long.parseLong(((StreamExpressionValue) runExpression).getValue());
     }
 
     if(queueExpression != null) {
-       queueSize= Integer.parseInt(((StreamExpressionValue)queueExpression.getParameter()).getValue());
+       queueSize= Integer.parseInt(((StreamExpressionValue)queueExpression).getValue());
     }
 
     // validate expression contains only what we want.

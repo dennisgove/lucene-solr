@@ -51,11 +51,11 @@ public class GroupOperation implements ReduceOperation {
 
   public GroupOperation(StreamExpression expression, StreamFactory factory) throws IOException {
 
-    StreamExpressionNamedParameter nParam = factory.getNamedOperand(expression, "n");
-    StreamExpressionNamedParameter sortExpression = factory.getNamedOperand(expression, "sort");
+    StreamExpressionParameter nParam = factory.getParameter(expression, "n");
+    StreamExpressionParameter sortExpression = factory.getParameter(expression, "sort");
 
-    StreamComparator streamComparator = factory.constructComparator(((StreamExpressionValue) sortExpression.getParameter()).getValue(), FieldComparator.class);
-    String nStr = ((StreamExpressionValue)nParam.getParameter()).getValue();
+    StreamComparator streamComparator = factory.constructComparator(((StreamExpressionValue) sortExpression).getValue(), FieldComparator.class);
+    String nStr = ((StreamExpressionValue)nParam).getValue();
     int nInt = 0;
 
     try{

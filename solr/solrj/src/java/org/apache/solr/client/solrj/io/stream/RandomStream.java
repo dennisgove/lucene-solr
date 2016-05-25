@@ -69,9 +69,9 @@ public class RandomStream extends TupleStream implements Expressible  {
 
   public RandomStream(StreamExpression expression, StreamFactory factory) throws IOException{
     // grab all parameters out
-    String collectionName = factory.getValueOperand(expression, 0);
-    List<StreamExpressionNamedParameter> namedParams = factory.getNamedOperands(expression);
-    StreamExpressionNamedParameter zkHostExpression = factory.getNamedOperand(expression, "zkHost");
+    String collectionName = factory.getValueParameter(expression, 0);
+    List<StreamExpressionNamedParameter> namedParams = factory.getNamedParameters(expression);
+    StreamExpressionParameter zkHostExpression = factory.getParameter(expression, "zkHost");
 
 
     // Collection Name
@@ -100,8 +100,8 @@ public class RandomStream extends TupleStream implements Expressible  {
         zkHost = factory.getDefaultZkHost();
       }
     }
-    else if(zkHostExpression.getParameter() instanceof StreamExpressionValue){
-      zkHost = ((StreamExpressionValue)zkHostExpression.getParameter()).getValue();
+    else if(zkHostExpression instanceof StreamExpressionValue){
+      zkHost = ((StreamExpressionValue)zkHostExpression).getValue();
     }
     if(null == zkHost){
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - zkHost not found for collection '%s'",expression,collectionName));

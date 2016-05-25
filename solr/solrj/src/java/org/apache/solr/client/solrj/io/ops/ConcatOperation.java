@@ -51,18 +51,18 @@ public class ConcatOperation implements StreamOperation {
   public ConcatOperation(StreamExpression expression, StreamFactory factory) throws IOException {
 
     if(3 == expression.getParameters().size()){
-      StreamExpressionNamedParameter fieldsParam = factory.getNamedOperand(expression, "fields");
-      String fieldsStr = ((StreamExpressionValue)fieldsParam.getParameter()).getValue();
+      StreamExpressionParameter fieldsParam = factory.getParameter(expression, "fields");
+      String fieldsStr = ((StreamExpressionValue)fieldsParam).getValue();
       this.fields = fieldsStr.split(",");
       for(int i=0; i<fields.length; i++) {
         fields[i] = fields[i].trim();
       }
 
-      StreamExpressionNamedParameter asParam = factory.getNamedOperand(expression, "as");
-      this.as = ((StreamExpressionValue)asParam.getParameter()).getValue();
+      StreamExpressionParameter asParam = factory.getParameter(expression, "as");
+      this.as = ((StreamExpressionValue)asParam).getValue();
 
-      StreamExpressionNamedParameter delim = factory.getNamedOperand(expression, "delim");
-      this.delim = ((StreamExpressionValue)delim.getParameter()).getValue();
+      StreamExpressionParameter delim = factory.getParameter(expression, "delim");
+      this.delim = ((StreamExpressionValue)delim).getValue();
     } else{
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - unknown operands found", expression));
     }

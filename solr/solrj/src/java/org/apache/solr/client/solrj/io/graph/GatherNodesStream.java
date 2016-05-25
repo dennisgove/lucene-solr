@@ -18,33 +18,37 @@
 package org.apache.solr.client.solrj.io.graph;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import org.apache.solr.client.solrj.io.eq.MultipleFieldEqualitor;
-import org.apache.solr.client.solrj.io.stream.*;
-import org.apache.solr.client.solrj.io.stream.metrics.*;
 import org.apache.solr.client.solrj.io.Tuple;
 import org.apache.solr.client.solrj.io.comp.StreamComparator;
 import org.apache.solr.client.solrj.io.eq.FieldEqualitor;
+import org.apache.solr.client.solrj.io.eq.MultipleFieldEqualitor;
+import org.apache.solr.client.solrj.io.stream.CloudSolrStream;
+import org.apache.solr.client.solrj.io.stream.StreamContext;
+import org.apache.solr.client.solrj.io.stream.TupleStream;
+import org.apache.solr.client.solrj.io.stream.UniqueStream;
 import org.apache.solr.client.solrj.io.stream.expr.Explanation;
+import org.apache.solr.client.solrj.io.stream.expr.Explanation.ExpressionType;
 import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
-import org.apache.solr.client.solrj.io.stream.expr.Explanation.ExpressionType;
+import org.apache.solr.client.solrj.io.stream.metrics.Metric;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.ExecutorUtil;
@@ -98,9 +102,9 @@ public class GatherNodesStream extends TupleStream implements Expressible {
   public GatherNodesStream(StreamExpression expression, StreamFactory factory) throws IOException {
 
 
-    String collectionName = factory.getValueOperand(expression, 0);
-    List<StreamExpressionNamedParameter> namedParams = factory.getNamedOperands(expression);
-    StreamExpressionNamedParameter zkHostExpression = factory.getNamedOperand(expression, "zkHost");
+    String collectionName = factory.getValueParameter(expression, 0);
+    List<StreamExpressionNamedParameter> namedParams = factory.getNamedParameters(expression);
+    StreamExpressionParameter zkHostExpression = factory.getParameter(expression, "zkHost");
 
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
     // Collection Name
@@ -111,12 +115,12 @@ public class GatherNodesStream extends TupleStream implements Expressible {
 
     Set<Traversal.Scatter> scatter = new HashSet();
 
-    StreamExpressionNamedParameter scatterExpression = factory.getNamedOperand(expression, "scatter");
+    StreamExpressionParameter scatterExpression = factory.getParameter(expression, "scatter");
 
     if(scatterExpression == null) {
       scatter.add(Traversal.Scatter.LEAVES);
     } else {
-      String s =  ((StreamExpressionValue)scatterExpression.getParameter()).getValue();
+      String s =  ((StreamExpressionValue)scatterExpression).getValue();
       String[] sArray = s.split(",");
       for(String sv : sArray) {
         sv = sv.trim();
@@ -129,17 +133,17 @@ public class GatherNodesStream extends TupleStream implements Expressible {
     }
 
     String gather = null;
-    StreamExpressionNamedParameter gatherExpression = factory.getNamedOperand(expression, "gather");
+    StreamExpressionParameter gatherExpression = factory.getParameter(expression, "gather");
 
     if(gatherExpression == null) {
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - from param is required",expression));
     } else {
-      gather = ((StreamExpressionValue)gatherExpression.getParameter()).getValue();
+      gather = ((StreamExpressionValue)gatherExpression).getValue();
     }
 
     String traverseFrom = null;
     String traverseTo = null;
-    StreamExpressionNamedParameter edgeExpression = factory.getNamedOperand(expression, "walk");
+    StreamExpressionParameter edgeExpression = factory.getParameter(expression, "walk");
 
     TupleStream stream = null;
 
@@ -148,7 +152,7 @@ public class GatherNodesStream extends TupleStream implements Expressible {
     } else {
       if(streamExpressions.size() > 0) {
         stream = factory.constructStream(streamExpressions.get(0));
-        String edge = ((StreamExpressionValue) edgeExpression.getParameter()).getValue();
+        String edge = ((StreamExpressionValue) edgeExpression).getValue();
         String[] fields = edge.split("->");
         if (fields.length != 2) {
           throw new IOException(String.format(Locale.ROOT, "invalid expression %s - walk param separated by an -> and must contain two fields", expression));
@@ -156,7 +160,7 @@ public class GatherNodesStream extends TupleStream implements Expressible {
         traverseFrom = fields[0].trim();
         traverseTo = fields[1].trim();
       } else {
-        String edge = ((StreamExpressionValue) edgeExpression.getParameter()).getValue();
+        String edge = ((StreamExpressionValue) edgeExpression).getValue();
         String[] fields = edge.split("->");
         if (fields.length != 2) {
           throw new IOException(String.format(Locale.ROOT, "invalid expression %s - walk param separated by an -> and must contain two fields", expression));
@@ -182,19 +186,19 @@ public class GatherNodesStream extends TupleStream implements Expressible {
 
     boolean trackTraversal = false;
 
-    StreamExpressionNamedParameter trackExpression = factory.getNamedOperand(expression, "trackTraversal");
+    StreamExpressionParameter trackExpression = factory.getParameter(expression, "trackTraversal");
 
     if(trackExpression != null) {
-      trackTraversal = Boolean.parseBoolean(((StreamExpressionValue) trackExpression.getParameter()).getValue());
+      trackTraversal = Boolean.parseBoolean(((StreamExpressionValue) trackExpression).getValue());
     } else {
       useDefaultTraversal = true;
     }
 
-    StreamExpressionNamedParameter docFreqExpression = factory.getNamedOperand(expression, "maxDocFreq");
+    StreamExpressionParameter docFreqExpression = factory.getParameter(expression, "maxDocFreq");
     int docFreq = -1;
 
     if(docFreqExpression != null) {
-      docFreq = Integer.parseInt(((StreamExpressionValue) docFreqExpression.getParameter()).getValue());
+      docFreq = Integer.parseInt(((StreamExpressionValue) docFreqExpression).getValue());
     }
 
     Map<String,String> params = new HashMap<String,String>();
@@ -217,8 +221,8 @@ public class GatherNodesStream extends TupleStream implements Expressible {
       if(zkHost == null) {
         zkHost = factory.getDefaultZkHost();
       }
-    } else if(zkHostExpression.getParameter() instanceof StreamExpressionValue) {
-      zkHost = ((StreamExpressionValue)zkHostExpression.getParameter()).getValue();
+    } else if(zkHostExpression instanceof StreamExpressionValue) {
+      zkHost = ((StreamExpressionValue)zkHostExpression).getValue();
     }
 
     if(null == zkHost){

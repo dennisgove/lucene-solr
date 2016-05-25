@@ -87,10 +87,10 @@ public class StatsStream extends TupleStream implements Expressible  {
 
   public StatsStream(StreamExpression expression, StreamFactory factory) throws IOException{   
     // grab all parameters out
-    String collectionName = factory.getValueOperand(expression, 0);
-    List<StreamExpressionNamedParameter> namedParams = factory.getNamedOperands(expression);
+    String collectionName = factory.getValueParameter(expression, 0);
+    List<StreamExpressionNamedParameter> namedParams = factory.getNamedParameters(expression);
     List<StreamExpression> metricExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Metric.class);
-    StreamExpressionNamedParameter zkHostExpression = factory.getNamedOperand(expression, "zkHost");
+    StreamExpressionParameter zkHostExpression = factory.getParameter(expression, "zkHost");
     
     // Validate there are no unknown parameters - zkHost is namedParameter so we don't need to count it twice
     if(expression.getParameters().size() != 1 + namedParams.size() + metricExpressions.size()){
@@ -122,8 +122,8 @@ public class StatsStream extends TupleStream implements Expressible  {
         zkHost = factory.getDefaultZkHost();
       }
     }
-    else if(zkHostExpression.getParameter() instanceof StreamExpressionValue){
-      zkHost = ((StreamExpressionValue)zkHostExpression.getParameter()).getValue();
+    else if(zkHostExpression instanceof StreamExpressionValue){
+      zkHost = ((StreamExpressionValue)zkHostExpression).getValue();
     }
     if(null == zkHost){
       throw new IOException(String.format(Locale.ROOT,"invalid expression %s - zkHost not found for collection '%s'",expression,collectionName));

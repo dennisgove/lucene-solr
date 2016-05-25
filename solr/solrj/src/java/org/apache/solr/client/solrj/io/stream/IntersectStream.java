@@ -31,6 +31,7 @@ import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 
@@ -55,7 +56,7 @@ public class IntersectStream extends TupleStream implements Expressible {
   public IntersectStream(StreamExpression expression,StreamFactory factory) throws IOException {
     // grab all parameters out
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
-    StreamExpressionNamedParameter onExpression = factory.getNamedOperand(expression, "on");
+    StreamExpressionParameter onExpression = factory.getParameter(expression, "on");
     
     // validate expression contains only what we want.
     if(expression.getParameters().size() != streamExpressions.size() + 1){
@@ -66,13 +67,13 @@ public class IntersectStream extends TupleStream implements Expressible {
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting two streams but found %d (must be TupleStream types)",expression, streamExpressions.size()));
     }
 
-    if(null == onExpression || !(onExpression.getParameter() instanceof StreamExpressionValue)){
+    if(null == onExpression || !(onExpression instanceof StreamExpressionValue)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting single 'on' parameter listing fields to merge on but didn't find one",expression));
     }
     
     init( factory.constructStream(streamExpressions.get(0)),
           factory.constructStream(streamExpressions.get(1)),
-          factory.constructEqualitor(((StreamExpressionValue)onExpression.getParameter()).getValue(), FieldEqualitor.class)
+          factory.constructEqualitor(((StreamExpressionValue)onExpression).getValue(), FieldEqualitor.class)
         );
   }
   

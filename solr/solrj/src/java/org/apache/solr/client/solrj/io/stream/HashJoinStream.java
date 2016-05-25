@@ -30,6 +30,7 @@ import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
+import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 
@@ -62,8 +63,8 @@ public class HashJoinStream extends TupleStream implements Expressible {
   public HashJoinStream(StreamExpression expression,StreamFactory factory) throws IOException {
     // grab all parameters out
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
-    StreamExpressionNamedParameter hashStreamExpression = factory.getNamedOperand(expression, "hashed");
-    StreamExpressionNamedParameter onExpression = factory.getNamedOperand(expression, "on");
+    StreamExpressionParameter hashStreamExpression = factory.getParameter(expression, "hashed");
+    StreamExpressionParameter onExpression = factory.getParameter(expression, "on");
     
     // validate expression contains only what we want.
     if(expression.getParameters().size() != streamExpressions.size() + 2){
@@ -74,15 +75,15 @@ public class HashJoinStream extends TupleStream implements Expressible {
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting two streams but found %d",expression, streamExpressions.size()));
     }
 
-    if(null == hashStreamExpression || !(hashStreamExpression.getParameter() instanceof StreamExpression)){
+    if(null == hashStreamExpression || !(hashStreamExpression instanceof StreamExpression)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting single 'hashed' parameter containing the stream to hash but didn't find one",expression));
     }
     
-    if(null == onExpression || !(onExpression.getParameter() instanceof StreamExpressionValue)){
+    if(null == onExpression || !(onExpression instanceof StreamExpressionValue)){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting single 'on' parameter listing fields to hash on but didn't find one",expression));
     }
     
-    String hashOnValue = ((StreamExpressionValue)onExpression.getParameter()).getValue();
+    String hashOnValue = ((StreamExpressionValue)onExpression).getValue();
     String[] parts = hashOnValue.split(",");
     List<String> hashOn = new ArrayList<String>(parts.length);
     for(String part : parts){
@@ -90,7 +91,7 @@ public class HashJoinStream extends TupleStream implements Expressible {
     }
     
     init( factory.constructStream(streamExpressions.get(0)),
-          factory.constructStream((StreamExpression)hashStreamExpression.getParameter()),
+          factory.constructStream((StreamExpression)hashStreamExpression),
           hashOn
         );
   }
