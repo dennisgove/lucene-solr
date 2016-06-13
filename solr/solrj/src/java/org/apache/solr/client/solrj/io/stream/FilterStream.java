@@ -18,6 +18,7 @@ package org.apache.solr.client.solrj.io.stream;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,30 +36,21 @@ import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParamete
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 
-
-/**
- * The UniqueStream emits a unique stream of Tuples based on a Comparator.
- *
- * Note: The sort order of the underlying stream must match the Comparator.
- **/
-
 public class FilterStream extends TupleStream implements Expressible {
 
   private static final long serialVersionUID = 1;
 
-  private TupleStream originalStream;
-  private StreamEqualitor originalEqualitor;
-  
-  private ReducerStream reducerStream;
+  private TupleStream stream;
+  private List<String> filters;
 
-  public FilterStream(TupleStream stream, StreamEqualitor eq) throws IOException {
-    init(stream,eq);
+  public FilterStream(TupleStream stream, List<String> filters) throws IOException {
+    init(stream,filters);
   }
   
   public FilterStream(StreamExpression expression,StreamFactory factory) throws IOException {
     // grab all parameters out
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
-    StreamExpressionNamedParameter overExpression = factory.getNamedOperand(expression, "over");
+    StreamExpressionNamedParameter fqExpression = factory.getNamedOperand(expression, "fq");
     
     // validate expression contains only what we want.
     if(expression.getParameters().size() != streamExpressions.size() + 1){
@@ -69,22 +61,20 @@ public class FilterStream extends TupleStream implements Expressible {
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting a single stream but found %d",expression, streamExpressions.size()));
     }
     
-    if(null == overExpression || !(overExpression.getParameter() instanceof StreamExpressionValue)){
-      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting single 'over' parameter listing fields to unique over but didn't find one",expression));
+    if(null == fqExpression || !(fqExpression.getParameter() instanceof StreamExpressionValue)){
+      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting 'fq' parameter but didn't find one",expression));
     }
     
-    init(factory.constructStream(streamExpressions.get(0)), factory.constructEqualitor(((StreamExpressionValue)overExpression.getParameter()).getValue(), FieldEqualitor.class));
+    // convert comma separated set of filters into list of filters
+    // TODO: Doesn't handle where a comma is *part* of the filter, gotta handle that
+    List<String> filters = Arrays.asList(((StreamExpressionValue)fqExpression.getParameter()).getValue().split(","));
+    
+    init(factory.constructStream(streamExpressions.get(0)), filters);
   }
   
-  private void init(TupleStream stream, StreamEqualitor eq) throws IOException{
-    this.originalStream = stream;
-    this.originalEqualitor = eq;
-    
-    this.reducerStream = new ReducerStream(stream, eq, new DistinctOperation());
-
-    if(!eq.isDerivedFrom(stream.getStreamSort())){
-      throw new IOException("Invalid UniqueStream - substream comparator (sort) must be a superset of this stream's equalitor.");
-    }    
+  private void init(TupleStream stream, List<String> filters) throws IOException{
+    this.stream = stream;
+    this.filters = filters;
   }
 
   @Override
@@ -98,24 +88,18 @@ public class FilterStream extends TupleStream implements Expressible {
     
     if(includeStreams){
       // streams
-      if(originalStream instanceof Expressible){
-        expression.addParameter(((Expressible)originalStream).toExpression(factory));
+      if(stream instanceof Expressible){
+        expression.addParameter(((Expressible)stream).toExpression(factory));
       }
       else{
-        throw new IOException("This UniqueStream contains a non-expressible TupleStream - it cannot be converted to an expression");
+        throw new IOException("This FilterStream contains a non-expressible TupleStream - it cannot be converted to an expression");
       }
     }
     else{
       expression.addParameter("<stream>");
     }
     
-    // over
-    if(originalEqualitor instanceof Expressible){
-      expression.addParameter(new StreamExpressionNamedParameter("over",((Expressible)originalEqualitor).toExpression(factory)));
-    }
-    else{
-      throw new IOException("This UniqueStream contains a non-expressible equalitor - it cannot be converted to an expression");
-    }
+    expression.addParameter(String.join(",",  filters));
     
     return expression;   
   }
@@ -125,44 +109,45 @@ public class FilterStream extends TupleStream implements Expressible {
 
     return new StreamExplanation(getStreamNodeId().toString())
       .withChildren(new Explanation[] {
-          originalStream.toExplanation(factory)
-          // we're not including that this is wrapped with a ReducerStream stream because that's just an implementation detail
+          stream.toExplanation(factory)
       })
       .withFunctionName(factory.getFunctionName(this.getClass()))
       .withImplementingClass(this.getClass().getName())
       .withExpressionType(ExpressionType.STREAM_DECORATOR)
-      .withExpression(toExpression(factory, false).toString())
-      .withHelper(originalEqualitor.toExplanation(factory));
-  }
-    
-  public void setStreamContext(StreamContext context) {
-    this.originalStream.setStreamContext(context);
-    this.reducerStream.setStreamContext(context);
-  }
-
-  public List<TupleStream> children() {
-    List<TupleStream> l =  new ArrayList<TupleStream>();
-    l.add(originalStream);
-    return l;
-  }
-
-  public void open() throws IOException {
-    reducerStream.open();
-      // opens originalStream as well
-  }
-
-  public void close() throws IOException {
-    reducerStream.close();
-      // closes originalStream as well
+      .withExpression(toExpression(factory, false).toString());
   }
 
   public Tuple read() throws IOException {
-    return reducerStream.read();
+    Tuple tuple = stream.read();
+    
+    while(!tuple.EOF && !isMatch(tuple, filters)){
+      tuple = stream.read();
+    }
+    
+    return tuple;
   }
 
   /** Return the stream sort - ie, the order in which records are returned */
   public StreamComparator getStreamSort(){
-    return reducerStream.getStreamSort();
+    return stream.getStreamSort();
+  }
+  
+  public void setStreamContext(StreamContext context) {
+    this.stream.setStreamContext(context);
+  }
+
+  public void open() throws IOException {
+    stream.open();
+  }
+
+  public void close() throws IOException {
+    stream.close();
+  }
+  
+  public List<TupleStream> children() {
+    List<TupleStream> l =  new ArrayList<TupleStream>();
+    l.add(stream);
+    return l;
   }
   
   public int getCost() {
