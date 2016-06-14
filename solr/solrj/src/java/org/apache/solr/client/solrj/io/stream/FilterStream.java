@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.io.Tuple;
 import org.apache.solr.client.solrj.io.comp.StreamComparator;
@@ -48,12 +49,14 @@ public class FilterStream extends TupleStream implements Expressible {
   }
   
   public FilterStream(StreamExpression expression,StreamFactory factory) throws IOException {
-    // grab all parameters out
+    // get the stream parameter
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
-    StreamExpressionNamedParameter fqExpression = factory.getNamedOperand(expression, "fq");
+    
+    // get the fq parameters
+    List<StreamExpressionNamedParameter> fqExpressions = factory.getNamedOperands(expression, "fq");
     
     // validate expression contains only what we want.
-    if(expression.getParameters().size() != streamExpressions.size() + 1){
+    if(expression.getParameters().size() != streamExpressions.size() + fqExpressions.size()){
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - unknown operands found", expression));
     }
     
@@ -61,13 +64,17 @@ public class FilterStream extends TupleStream implements Expressible {
       throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting a single stream but found %d",expression, streamExpressions.size()));
     }
     
-    if(null == fqExpression || !(fqExpression.getParameter() instanceof StreamExpressionValue)){
-      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting 'fq' parameter but didn't find one",expression));
+    if(0 == fqExpressions.size()){
+      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting at least one fq parameter but found none",expression));
     }
     
-    // convert comma separated set of filters into list of filters
-    // TODO: Doesn't handle where a comma is *part* of the filter, gotta handle that
-    List<String> filters = Arrays.asList(((StreamExpressionValue)fqExpression.getParameter()).getValue().split(","));
+    for(StreamExpressionNamedParameter fqExpression : fqExpressions){
+      if(!(fqExpression.getParameter() instanceof StreamExpressionValue)){
+        throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting 'fq' parameter but didn't find one",expression));
+      }
+    }
+    
+    List<String> filters = fqExpressions.stream().map(item -> ((StreamExpressionValue)item.getParameter()).getValue()).collect(Collectors.toList());
     
     init(factory.constructStream(streamExpressions.get(0)), filters);
   }
