@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.io.comp.ComparatorOrder;
 import org.apache.solr.client.solrj.io.comp.MultipleFieldComparator;
@@ -106,6 +107,12 @@ public class StreamFactory implements Serializable {
     }
     
     return namedParameters;
+  }
+  public List<StreamExpressionNamedParameter> getNamedOperands(StreamExpression expression, String name){
+    return getOperandsOfType(expression, StreamExpressionNamedParameter.class).stream()
+        .map(parameter -> (StreamExpressionNamedParameter)parameter)
+        .filter(parameter -> parameter.getName().equals(name))
+        .collect(Collectors.toList());
   }
   public StreamExpressionNamedParameter getNamedOperand(StreamExpression expression, String name){
     List<StreamExpressionNamedParameter> namedParameters = getNamedOperands(expression);
