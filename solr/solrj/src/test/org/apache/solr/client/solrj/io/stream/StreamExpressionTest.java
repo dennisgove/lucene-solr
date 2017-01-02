@@ -50,6 +50,7 @@ import org.apache.solr.cloud.AbstractDistribZkTestBase;
 import org.apache.solr.cloud.SolrCloudTestCase;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.handler.LuceneMatchStream;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -4543,6 +4544,44 @@ public class StreamExpressionTest extends SolrCloudTestCase {
     assertOrder(tuples, 2);
 
   }
+  
+  @Test
+  public void testLuceneMatchStream() throws Exception {
+
+    new UpdateRequest()
+        .add(id, "0", "a_s", "hello0", "a_i", "0", "a_f", "0")
+        .add(id, "2", "a_s", "hello2", "a_i", "2", "a_f", "0")
+        .add(id, "3", "a_s", "hello3", "a_i", "3", "a_f", "3")
+        .add(id, "4", "a_s", "hello4", "a_i", "4", "a_f", "4")
+        .add(id, "1", "a_s", "hello1", "a_i", "1", "a_f", "1")
+        .add(id, "5", "a_s", "hello1", "a_i", "1", "a_f", "2")
+        .commit(cluster.getSolrClient(), COLLECTIONORALIAS);
+    
+    StreamFactory factory = new StreamFactory()
+      .withCollectionZkHost(COLLECTIONORALIAS, cluster.getZkServer().getZkAddress())
+      .withFunctionName("search", CloudSolrStream.class)
+      .withFunctionName("luceneMatch", LuceneMatchStream.class);
+    
+    TupleStream stream;
+    List<Tuple> tuples;
+    
+    // Basic test
+//    stream = factory.constructStream("luceneMatch(fq=\"a_s:hello1\", search(" + COLLECTIONORALIAS + ", q=*:*, fl=\"id,a_s\", sort=\"id asc\"))");
+//    tuples = getTuples(stream);
+//    assert(tuples.size() == 2);
+//    assertOrder(tuples, 1,5);
+//    
+//    stream = factory.constructStream("luceneMatch(fq=\"a_s:hello*\", search(" + COLLECTIONORALIAS + ", q=*:*, fl=\"id,a_s\", sort=\"id asc\"))");
+//    tuples = getTuples(stream);
+//    assert(tuples.size() == 6);
+//    assertOrder(tuples, 0,1,2,3,4,5);
+    
+    stream = factory.constructStream("luceneMatch(fq=\"a_s:hello*\", fq=\"a_i:1\", search(" + COLLECTIONORALIAS + ", q=*:*, fl=\"id,a_s,a_i\", sort=\"id asc\"))");
+    tuples = getTuples(stream);
+    assertEquals(4, tuples.size());
+    assertOrder(tuples, 1,2,3,5);
+  }
+
 
   protected List<Tuple> getTuples(TupleStream tupleStream) throws IOException {
     tupleStream.open();

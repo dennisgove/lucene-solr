@@ -14,47 +14,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.solr.client.solrj.io.stream;
+package org.apache.solr.handler;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.DoublePoint;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.FloatPoint;
+import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.document.LongPoint;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.memory.MemoryIndex;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.Query;
 import org.apache.solr.client.solrj.io.Tuple;
 import org.apache.solr.client.solrj.io.comp.StreamComparator;
-import org.apache.solr.client.solrj.io.ops.StreamOperation;
+import org.apache.solr.client.solrj.io.stream.StreamContext;
+import org.apache.solr.client.solrj.io.stream.TupleStream;
 import org.apache.solr.client.solrj.io.stream.expr.Explanation;
 import org.apache.solr.client.solrj.io.stream.expr.Explanation.ExpressionType;
 import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExplanation;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionNamedParameter;
-import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
-import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 import org.carrot2.shaded.guava.common.collect.Lists;
 
-public class FilterStream extends TupleStream implements Expressible {
+public class LuceneMatchStream extends TupleStream implements Expressible {
 
   private static final long serialVersionUID = 1;
 
   private TupleStream stream;
-  private List<String> fqs;
+  private List<Query> queries;
 
-  public FilterStream(TupleStream stream, String ... fq) throws IOException {
+  public LuceneMatchStream(TupleStream stream, String ... fq) throws IOException {
     init(stream, Arrays.asList(fq));
   }
   
-  public FilterStream(TupleStream stream, List<String> fqs) throws IOException {
+  public LuceneMatchStream(TupleStream stream, List<String> fqs) throws IOException {
     init(stream, fqs);
   }
   
-  public FilterStream(StreamExpression expression,StreamFactory factory) throws IOException {
+  public LuceneMatchStream(StreamExpression expression,StreamFactory factory) throws IOException {
     // grab all parameters out
     List<StreamExpression> streamExpressions = factory.getExpressionOperandsRepresentingTypes(expression, Expressible.class, TupleStream.class);
     List<StreamExpressionNamedParameter> fqExpressions = factory.getNamedOperands(expression, "fq");
@@ -77,9 +88,25 @@ public class FilterStream extends TupleStream implements Expressible {
         );
   }
   
-  private void init(TupleStream stream, List<String> fqs){
+  private void init(TupleStream stream, List<String> fqs) throws IOException{
     this.stream = stream;
-    this.fqs = fqs;
+    this.queries = constructQueries(fqs);
+  }
+  
+  private List<Query> constructQueries(List<String> fqs) throws IOException {
+    Analyzer analyzer = new StandardAnalyzer();
+    QueryParser parser = new QueryParser(null, analyzer); // default field is null
+    
+    List<Query> queries = new ArrayList<Query>(fqs.size());
+    for(String fq : fqs){
+      try{
+        queries.add(parser.parse(fq));
+      }
+      catch(ParseException e){
+        throw new IOException(String.format(Locale.ROOT, "Failed to parse fq '%s' with error %s", fq, e.getMessage()), e);
+      }
+    }
+    return queries;
   }
     
   @Override
@@ -104,7 +131,7 @@ public class FilterStream extends TupleStream implements Expressible {
       expression.addParameter("<stream>");
     }
 
-    for(String fq : fqs){
+    for(String fq : queries.stream().map(item -> item.toString(null)).collect(Collectors.toList())){
       expression.addParameter(new StreamExpressionNamedParameter("fq", fq));
     }
     
@@ -151,18 +178,53 @@ public class FilterStream extends TupleStream implements Expressible {
 
     return tuple;
   }
-  
+    
   private boolean isMatch(Tuple tuple){
-    for (String fq : fqs) {
-      if ((fq != null) && (fq.trim().length() != 0)) {
-        fq = macroExpander.expand(fq);
-        final QParser fqp = QParser.getParser(fq, req);
-        final Query filterQuery = fqp.getQuery();
-        if (filterQuery != null) {
-          queryAndFilters.add(filterQuery);
-        }
+    MemoryIndex index = MemoryIndex.fromDocument(createDocument(tuple), new StandardAnalyzer());
+    
+    for(Query query : queries){
+      if(0 == index.search(query)){
+        return false;
       }
     }
+    
+    return true;
+//    return queries.stream().allMatch(query -> index.search(query) > 0);
+  }
+  
+  private Document createDocument(Tuple tuple){
+    Document document = new Document();
+    
+    for(Object key : tuple.fields.keySet()){
+      String fieldName = (String)key;
+      Object value = tuple.fields.get(key);
+      
+      Field field;
+      if(value instanceof String){
+        field = new StringField(fieldName, (String)value, Store.NO);
+        // we're not handling text fields....
+      }
+      else if(value instanceof Float){
+        field = new FloatPoint(fieldName, (Float)value);
+      }
+      else if(value instanceof Double){
+        field = new DoublePoint(fieldName, (Double)value);
+      }
+      else if(value instanceof Long){
+        field = new LongPoint(fieldName, (Long)value);
+      }
+      else if(value instanceof Integer){
+        field = new IntPoint(fieldName, (Integer)value);
+      }
+      else{
+        // value is not a known, supported type
+        continue;
+      }
+      
+      document.add(field);
+    }
+    
+    return document;
   }
   
   /** Return the stream sort - ie, the order in which records are returned */
