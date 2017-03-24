@@ -16,6 +16,9 @@
  */
 package org.apache.solr.handler;
 
+import static org.apache.solr.common.params.CommonParams.ID;
+import static org.apache.solr.common.params.CommonParams.SORT;
+
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -33,18 +36,22 @@ import org.apache.solr.client.solrj.io.comp.StreamComparator;
 import org.apache.solr.client.solrj.io.eval.AbsoluteValueEvaluator;
 import org.apache.solr.client.solrj.io.eval.AddEvaluator;
 import org.apache.solr.client.solrj.io.eval.AndEvaluator;
+import org.apache.solr.client.solrj.io.eval.CeilingEvaluator;
 import org.apache.solr.client.solrj.io.eval.DivideEvaluator;
 import org.apache.solr.client.solrj.io.eval.EqualsEvaluator;
 import org.apache.solr.client.solrj.io.eval.ExclusiveOrEvaluator;
+import org.apache.solr.client.solrj.io.eval.FloorEvaluator;
 import org.apache.solr.client.solrj.io.eval.GreaterThanEqualToEvaluator;
 import org.apache.solr.client.solrj.io.eval.GreaterThanEvaluator;
 import org.apache.solr.client.solrj.io.eval.IfThenElseEvaluator;
 import org.apache.solr.client.solrj.io.eval.LessThanEqualToEvaluator;
 import org.apache.solr.client.solrj.io.eval.LessThanEvaluator;
+import org.apache.solr.client.solrj.io.eval.ModuloEvaluator;
 import org.apache.solr.client.solrj.io.eval.MultiplyEvaluator;
 import org.apache.solr.client.solrj.io.eval.NaturalLogEvaluator;
 import org.apache.solr.client.solrj.io.eval.NotEvaluator;
 import org.apache.solr.client.solrj.io.eval.OrEvaluator;
+import org.apache.solr.client.solrj.io.eval.PowerEvaluator;
 import org.apache.solr.client.solrj.io.eval.RawValueEvaluator;
 import org.apache.solr.client.solrj.io.eval.SubtractEvaluator;
 import org.apache.solr.client.solrj.io.graph.GatherNodesStream;
@@ -53,7 +60,43 @@ import org.apache.solr.client.solrj.io.ops.ConcatOperation;
 import org.apache.solr.client.solrj.io.ops.DistinctOperation;
 import org.apache.solr.client.solrj.io.ops.GroupOperation;
 import org.apache.solr.client.solrj.io.ops.ReplaceOperation;
-import org.apache.solr.client.solrj.io.stream.*;
+import org.apache.solr.client.solrj.io.stream.CartesianProductStream;
+import org.apache.solr.client.solrj.io.stream.CloudSolrStream;
+import org.apache.solr.client.solrj.io.stream.CommitStream;
+import org.apache.solr.client.solrj.io.stream.ComplementStream;
+import org.apache.solr.client.solrj.io.stream.DaemonStream;
+import org.apache.solr.client.solrj.io.stream.ExceptionStream;
+import org.apache.solr.client.solrj.io.stream.ExecutorStream;
+import org.apache.solr.client.solrj.io.stream.FacetStream;
+import org.apache.solr.client.solrj.io.stream.FeaturesSelectionStream;
+import org.apache.solr.client.solrj.io.stream.FetchStream;
+import org.apache.solr.client.solrj.io.stream.HashJoinStream;
+import org.apache.solr.client.solrj.io.stream.HavingStream;
+import org.apache.solr.client.solrj.io.stream.InnerJoinStream;
+import org.apache.solr.client.solrj.io.stream.IntersectStream;
+import org.apache.solr.client.solrj.io.stream.JDBCStream;
+import org.apache.solr.client.solrj.io.stream.LeftOuterJoinStream;
+import org.apache.solr.client.solrj.io.stream.MergeStream;
+import org.apache.solr.client.solrj.io.stream.ModelStream;
+import org.apache.solr.client.solrj.io.stream.NullStream;
+import org.apache.solr.client.solrj.io.stream.OuterHashJoinStream;
+import org.apache.solr.client.solrj.io.stream.ParallelStream;
+import org.apache.solr.client.solrj.io.stream.PriorityStream;
+import org.apache.solr.client.solrj.io.stream.RandomStream;
+import org.apache.solr.client.solrj.io.stream.RankStream;
+import org.apache.solr.client.solrj.io.stream.ReducerStream;
+import org.apache.solr.client.solrj.io.stream.RollupStream;
+import org.apache.solr.client.solrj.io.stream.ScoreNodesStream;
+import org.apache.solr.client.solrj.io.stream.SelectStream;
+import org.apache.solr.client.solrj.io.stream.SignificantTermsStream;
+import org.apache.solr.client.solrj.io.stream.SortStream;
+import org.apache.solr.client.solrj.io.stream.StatsStream;
+import org.apache.solr.client.solrj.io.stream.StreamContext;
+import org.apache.solr.client.solrj.io.stream.TextLogitStream;
+import org.apache.solr.client.solrj.io.stream.TopicStream;
+import org.apache.solr.client.solrj.io.stream.TupleStream;
+import org.apache.solr.client.solrj.io.stream.UniqueStream;
+import org.apache.solr.client.solrj.io.stream.UpdateStream;
 import org.apache.solr.client.solrj.io.stream.expr.Explanation;
 import org.apache.solr.client.solrj.io.stream.expr.Explanation.ExpressionType;
 import org.apache.solr.client.solrj.io.stream.expr.Expressible;
@@ -79,9 +122,6 @@ import org.apache.solr.security.PermissionNameProvider;
 import org.apache.solr.util.plugin.SolrCoreAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.solr.common.params.CommonParams.ID;
-import static org.apache.solr.common.params.CommonParams.SORT;
 
 public class StreamHandler extends RequestHandlerBase implements SolrCoreAware, PermissionNameProvider {
 
@@ -207,6 +247,11 @@ public class StreamHandler extends RequestHandlerBase implements SolrCoreAware, 
       .withFunctionName("mult", MultiplyEvaluator.class)
       .withFunctionName("sub", SubtractEvaluator.class)
       .withFunctionName("log", NaturalLogEvaluator.class)
+      .withFunctionName("pow", PowerEvaluator.class)
+      .withFunctionName("mod", ModuloEvaluator.class)
+      .withFunctionName("ceil", CeilingEvaluator.class)
+      .withFunctionName("floor", FloorEvaluator.class)
+      
       // Conditional Stream Evaluators
       .withFunctionName("if", IfThenElseEvaluator.class)
       ;

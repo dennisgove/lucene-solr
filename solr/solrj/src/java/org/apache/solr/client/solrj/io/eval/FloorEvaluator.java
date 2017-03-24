@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 /**
- * 
+ *
  */
 package org.apache.solr.client.solrj.io.eval;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Locale;
 
@@ -28,34 +29,33 @@ import org.apache.solr.client.solrj.io.Tuple;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 
-public class PowerEvaluator extends NumberEvaluator {
+public class FloorEvaluator extends NumberEvaluator {
   protected static final long serialVersionUID = 1L;
-  
-  public PowerEvaluator(StreamExpression expression, StreamFactory factory) throws IOException{
+
+  public FloorEvaluator(StreamExpression expression, StreamFactory factory) throws IOException{
     super(expression, factory);
-    
-    if(2 != subEvaluators.size()){
-      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting exactly two values but found %d",expression,subEvaluators.size()));
+
+    if(1 != subEvaluators.size()){
+      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting one value but found %d",expression,subEvaluators.size()));
     }
   }
 
   @Override
   public Number evaluate(Tuple tuple) throws IOException {
-    
+
     List<BigDecimal> results = evaluateAll(tuple);
-    
-    if(results.stream().anyMatch(item -> null == item)){
+
+    // we're still doing these checks because if we ever add an array-flatten evaluator,
+    // one found in the constructor could become != 1
+    if(1 != results.size()){
+      throw new IOException(String.format(Locale.ROOT,"%s(...) only works with a 1 value but %d were provided", constructingFactory.getFunctionName(getClass()), results.size()));
+    }
+
+    if(null == results.get(0)){
       return null;
     }
-    
-    BigDecimal value = results.get(0);
-    BigDecimal exponent = results.get(1);
-    
-    double result = Math.pow(value.doubleValue(), exponent.doubleValue());
-    if(Double.isNaN(result)){
-      return result;
-    }
-    
-    return normalizeType(BigDecimal.valueOf(result));
+
+    return normalizeType(results.get(0).setScale(0, RoundingMode.FLOOR));
   }
+
 }
