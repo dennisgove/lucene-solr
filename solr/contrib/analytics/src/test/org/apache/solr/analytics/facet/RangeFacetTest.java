@@ -24,7 +24,7 @@ import org.junit.Test;
 
 
 public class RangeFacetTest extends AbstractAnalyticsFacetTest {
-  static String fileName = "rangeFacets.txt";
+  static String fileName = "/analytics/requestFiles/rangeFacets.txt";
 
   public static final int INT = 71;
   public static final int LONG = 36;
@@ -46,7 +46,7 @@ public class RangeFacetTest extends AbstractAnalyticsFacetTest {
   
   @BeforeClass
   public static void beforeClass() throws Exception {
-    initCore("solrconfig-analytics.xml","schema-analytics.xml");
+    initCore("solrconfig-basic.xml","schema-analytics.xml");
     h.update("<delete><query>*:*</query></delete>");
     
     //INT
@@ -145,6 +145,11 @@ public class RangeFacetTest extends AbstractAnalyticsFacetTest {
     ArrayList<Long> floatDoubleTest = (ArrayList<Long>)calculateStat(transformLists(floatDoubleTestStart, 4, 47, 11
                                                                      , false, false, false, true, false), "count");
     assertEquals(getRawResponse(), floatDouble,floatDoubleTest);
+    //Float Date                      
+    ArrayList<Double> floatDate = getDoubleList("rf", "rangeFacets", "date_dtd", "double", "sumOfSquares");
+    ArrayList<Double> floatDateTest = calculateNumberStat(transformLists(floatDateTestStart, 4, 46, 5
+                                                          , false, false, true, true, false), "sumOfSquares");
+    assertEquals(getRawResponse(), floatDate,floatDateTest);
   }
   
 
@@ -177,6 +182,11 @@ public class RangeFacetTest extends AbstractAnalyticsFacetTest {
     ArrayList<Long> floatDoubleTest = (ArrayList<Long>)calculateStat(transformLists(floatDoubleTestStart, 4, 47, 11
                                                                      , true, false, false, true, false), "count");
     assertEquals(getRawResponse(), floatDouble,floatDoubleTest);
+    //Float Date                      
+    ArrayList<Double> floatDate = getDoubleList("hf", "rangeFacets", "date_dtd", "double", "sumOfSquares");
+    ArrayList<Double> floatDateTest = calculateNumberStat(transformLists(floatDateTestStart, 4, 46, 5
+                                                          , true, false, true, true, false), "sumOfSquares");
+    assertEquals(getRawResponse(), floatDate,floatDateTest);
   }
   
   @SuppressWarnings("unchecked")
@@ -208,6 +218,11 @@ public class RangeFacetTest extends AbstractAnalyticsFacetTest {
     ArrayList<Long> floatDoubleTest = (ArrayList<Long>)calculateStat(transformLists(floatDoubleTestStart, 4, 47, "2,3,11"
                                                           , false, false, false, true, false), "count");
     assertEquals(getRawResponse(), floatDouble,floatDoubleTest);
+    //Float Date                      
+    ArrayList<Double> floatDate = getDoubleList("mf", "rangeFacets", "date_dtd", "double", "sumOfSquares");
+    ArrayList<Double> floatDateTest = calculateNumberStat(transformLists(floatDateTestStart, 4, 46, "4,5"
+                                                          , false, false, true, true, false), "sumOfSquares");
+    assertEquals(getRawResponse(), floatDate,floatDateTest);
   }
   
   private <T> ArrayList<ArrayList<T>> transformLists(ArrayList<ArrayList<T>> listsStart, int start, int end, int gap
@@ -294,9 +309,15 @@ public class RangeFacetTest extends AbstractAnalyticsFacetTest {
         after.addAll(listsStart.get(i));
       }
     }
-    lists.add(before);
-    lists.add(after);
-    lists.add(between);
+    if (before.size()>0) {
+      lists.add(before);
+    }
+    if (after.size()>0) {
+      lists.add(after);
+    }
+    if (between.size()>0) {
+      lists.add(between);
+    }
     return lists;
   }
   
@@ -408,9 +429,15 @@ public class RangeFacetTest extends AbstractAnalyticsFacetTest {
         after.addAll(listsStart.get(i));
       }
     }
-    lists.add(before);
-    lists.add(after);
-    lists.add(between);
+    if (before.size()>0) {
+      lists.add(before);
+    }
+    if (after.size()>0) {
+      lists.add(after);
+    }
+    if (between.size()>0) {
+      lists.add(between);
+    }
     return lists;
   }
   

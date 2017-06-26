@@ -18,10 +18,6 @@ package org.apache.solr.analytics.util;
 
 import java.util.List;
 
-/**
- * Only used for testing.
- * Medians are calculated with the {@link OrdinalCalculator} for actual analytics requests.
- */
 public class MedianCalculator {
 
   /**

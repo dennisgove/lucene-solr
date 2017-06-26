@@ -16,8 +16,9 @@
  */
  
 /** 
- * Utility classes for the analytics component.
+ * Utilities used by analytics component
  */
 package org.apache.solr.analytics.util;
+
 
 

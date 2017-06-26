@@ -24,11 +24,10 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.w3c.dom.Node;
 
 
 public class FieldFacetTest extends AbstractAnalyticsFacetTest{
-  static String fileName = "fieldFacets.txt";
+  static String fileName = "/analytics/requestFiles/fieldFacets.txt";
 
   public static final int INT = 71;
   public static final int LONG = 36;
@@ -88,7 +87,7 @@ public class FieldFacetTest extends AbstractAnalyticsFacetTest{
   
   @BeforeClass
   public static void beforeClass() throws Exception {
-    initCore("solrconfig-analytics.xml","schema-analytics.xml");
+    initCore("solrconfig-basic.xml","schema-analytics.xml");
     h.update("<delete><query>*:*</query></delete>");
     
     defaults.put("int", new Integer(0));
@@ -474,6 +473,46 @@ public class FieldFacetTest extends AbstractAnalyticsFacetTest{
     //Double String
     Collection<Double> doubleString = getDoubleList("mean","fieldFacets", "string_sd", "double", "double");
     ArrayList<Double> doubleStringTest = calculateNumberStat(doubleStringTestStart, "mean");
+    assertEquals(getRawResponse(),doubleString,doubleStringTest);
+  }
+  
+  @SuppressWarnings("unchecked")
+  @Test
+  public void sumOfSquaresFacetAscTest() throws Exception {
+    //Int Date
+    Collection<Double> intDate = getDoubleList("sumOfSquares","fieldFacets", "date_dtd", "double", "int");
+    ArrayList<Double> intDateTest = calculateNumberStat(intDateTestStart, "sumOfSquares");
+    assertEquals(getRawResponse(),intDate,intDateTest);
+    //Int String
+    Collection<Double> intString = getDoubleList("sumOfSquares","fieldFacets", "string_sd", "double", "int");
+    ArrayList<Double> intStringTest = calculateNumberStat(intStringTestStart, "sumOfSquares");
+    assertEquals(getRawResponse(),intString,intStringTest);
+
+    //Long Date
+    Collection<Double> longDate = getDoubleList("sumOfSquares","fieldFacets", "date_dtd", "double", "long");
+    ArrayList<Double> longDateTest = calculateNumberStat(longDateTestStart, "sumOfSquares");
+    assertEquals(getRawResponse(),longDate,longDateTest);
+    //Long String
+    Collection<Double> longString = getDoubleList("sumOfSquares","fieldFacets", "string_sd", "double", "long");
+    ArrayList<Double> longStringTest = calculateNumberStat(longStringTestStart, "sumOfSquares");
+    assertEquals(getRawResponse(),longString,longStringTest);
+
+    //Float Date
+    Collection<Double> floatDate = getDoubleList("sumOfSquares","fieldFacets", "date_dtd", "double", "float");
+    ArrayList<Double> floatDateTest = calculateNumberStat(floatDateTestStart, "sumOfSquares");
+    assertEquals(getRawResponse(),floatDate,floatDateTest);
+    //Float String
+    Collection<Double> floatString = getDoubleList("sumOfSquares","fieldFacets", "string_sd", "double", "float");
+    ArrayList<Double> floatStringTest = calculateNumberStat(floatStringTestStart, "sumOfSquares");
+    assertEquals(getRawResponse(),floatString,floatStringTest);
+
+    //Double Date
+    Collection<Double> doubleDate = getDoubleList("sumOfSquares","fieldFacets", "date_dtd", "double", "double");
+    ArrayList<Double> doubleDateTest = calculateNumberStat(doubleDateTestStart, "sumOfSquares");
+    assertEquals(getRawResponse(),doubleDate,doubleDateTest);
+    //Double String
+    Collection<Double> doubleString = getDoubleList("sumOfSquares","fieldFacets", "string_sd", "double", "double");
+    ArrayList<Double> doubleStringTest = calculateNumberStat(doubleStringTestStart, "sumOfSquares");
     assertEquals(getRawResponse(),doubleString,doubleStringTest);
   }
   
@@ -998,33 +1037,31 @@ public class FieldFacetTest extends AbstractAnalyticsFacetTest{
   public void missingFacetTest() throws Exception { 
     //int MultiDate
     String xPath = "/response/lst[@name='stats']/lst[@name='missingf']/lst[@name='fieldFacets']/lst[@name='date_dtdm']/lst[@name='(MISSING)']";
-    Node missingNodeXPath = getNode(xPath);
-    assertNotNull(getRawResponse(), missingNodeXPath);
+    assertNotNull(getRawResponse(), getNode(xPath));
 
     ArrayList<Double> string = getDoubleList("missingf", "fieldFacets", "date_dtdm", "double", "mean");
-    //super.removeNodes(xPath, string);
+    string.remove(0);
     ArrayList<Double> stringTest = calculateNumberStat(multiDateTestStart, "mean");
     assertEquals(getRawResponse(), string,stringTest);
-
+    
     //Int String
     xPath = "/response/lst[@name='stats']/lst[@name='missingf']/lst[@name='fieldFacets']/lst[@name='string_sd']/lst[@name='(MISSING)']";
-    missingNodeXPath = getNode(xPath);
-    String missingNodeXPathStr = xPath;
-    assertNotNull(getRawResponse(), missingNodeXPath);
+    assertNotNull(getRawResponse(), getNode(xPath));
 
     xPath = "/response/lst[@name='stats']/lst[@name='missingf']/lst[@name='fieldFacets']/lst[@name='string_sd']/lst[@name='str0']";
     assertNull(getRawResponse(), getNode(xPath));
-
     List<Double> intString = getDoubleList("missingf", "fieldFacets", "string_sd", "double", "mean");
-    //removeNodes(missingNodeXPathStr, intString);
+    intString.remove(0);
     ArrayList<Double> intStringTest = calculateNumberStat(intStringTestStart, "mean");
     assertEquals(getRawResponse(), intString,intStringTest);
-
+    
     //Int Date
     Collection<Double> intDate = getDoubleList("missingf", "fieldFacets", "date_dtd", "double", "mean");
     ArrayList<ArrayList<Double>> intDateMissingTestStart = (ArrayList<ArrayList<Double>>) intDateTestStart.clone();
     ArrayList<Double> intDateTest = calculateNumberStat(intDateMissingTestStart, "mean");
     assertEquals(getRawResponse(),intDate,intDateTest);
+    
+    
   }
 
   private void checkStddevs(ArrayList<Double> list1, ArrayList<Double> list2) {

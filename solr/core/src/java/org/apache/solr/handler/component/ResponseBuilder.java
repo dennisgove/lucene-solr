@@ -60,7 +60,6 @@ public class ResponseBuilder
   public boolean doExpand;
   public boolean doStats;
   public boolean doTerms;
-  public boolean doAnalytics;
   public MergeStrategy mergeFieldHandler;
 
   private boolean needDocList = false;
@@ -174,8 +173,6 @@ public class ResponseBuilder
   StatsInfo _statsInfo;
   TermsComponent.TermsHelper _termsHelper;
   SimpleOrderedMap<List<NamedList<Object>>> _pivots;
-  Object _analyticsRequestManager;
-  boolean _isOlapAnalytics;
 
   // Context fields for grouping
   public final Map<String, Collection<SearchGroup<BytesRef>>> mergedSearchGroups = new HashMap<>();
