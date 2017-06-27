@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import org.apache.solr.analytics.function.reduction.data.ReductionData;
 import org.apache.solr.analytics.stream.reservation.LongReservation;
 import org.apache.solr.analytics.stream.reservation.ReductionDataReservation;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
 
 public abstract class CountCollector extends ReductionDataCollector<CountCollector.CountData> {
   public static final String name = "count";

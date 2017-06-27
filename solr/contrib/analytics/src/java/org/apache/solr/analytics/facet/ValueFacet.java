@@ -19,7 +19,7 @@ package org.apache.solr.analytics.facet;
 import java.util.function.Consumer;
 
 import org.apache.solr.analytics.function.ReductionCollectionManager.ReductionDataCollection;
-import org.apache.solr.analytics.values.StringValueStream;
+import org.apache.solr.analytics.value.StringValueStream;
 
 /**
  * A facet that breaks up data by the values of a mapping expression or field.

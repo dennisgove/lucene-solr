@@ -17,9 +17,10 @@
 package org.apache.solr.analytics.function.mapping;
 
 import org.apache.solr.analytics.ExpressionFactory.CreatorFunction;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.BooleanValue;
-import org.apache.solr.analytics.values.BooleanValueStream;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.TwoBoolInBoolOutLambda;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.BooleanValue;
+import org.apache.solr.analytics.value.BooleanValueStream;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 

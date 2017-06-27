@@ -29,10 +29,10 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.solr.analytics.function.field.AnalyticsField;
 import org.apache.solr.analytics.function.reduction.data.ReductionData;
 import org.apache.solr.analytics.function.reduction.data.ReductionDataCollector;
-import org.apache.solr.analytics.stream.reservation.ReductionDataReader;
 import org.apache.solr.analytics.stream.reservation.ReductionDataReservation;
-import org.apache.solr.analytics.stream.reservation.ReductionDataWriter;
-import org.apache.solr.analytics.values.AnalyticsValue;
+import org.apache.solr.analytics.stream.reservation.read.ReductionDataReader;
+import org.apache.solr.analytics.stream.reservation.write.ReductionDataWriter;
+import org.apache.solr.analytics.value.AnalyticsValue;
 
 /**
  * The manager of reduction collection.

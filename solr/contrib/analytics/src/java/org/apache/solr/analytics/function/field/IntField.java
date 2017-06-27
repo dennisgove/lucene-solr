@@ -25,9 +25,9 @@ import java.util.function.LongConsumer;
 import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.NumericDocValues;
-import org.apache.solr.analytics.util.comparator.ExpressionComparator;
+import org.apache.solr.analytics.facet.compare.ExpressionComparator;
 import org.apache.solr.analytics.util.function.FloatConsumer;
-import org.apache.solr.analytics.values.IntValue.CastingIntValue;
+import org.apache.solr.analytics.value.IntValue.CastingIntValue;
 import org.apache.solr.schema.IntPointField;
 import org.apache.solr.schema.TrieIntField;
 

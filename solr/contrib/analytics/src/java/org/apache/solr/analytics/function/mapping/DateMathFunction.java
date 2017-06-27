@@ -21,12 +21,12 @@ import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
 import org.apache.solr.analytics.ExpressionFactory.CreatorFunction;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.DateValue;
-import org.apache.solr.analytics.values.DateValueStream;
-import org.apache.solr.analytics.values.DateValue.AbstractDateValue;
-import org.apache.solr.analytics.values.DateValueStream.AbstractDateValueStream;
-import org.apache.solr.analytics.values.constant.ConstantStringValue;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.DateValue;
+import org.apache.solr.analytics.value.DateValueStream;
+import org.apache.solr.analytics.value.DateValue.AbstractDateValue;
+import org.apache.solr.analytics.value.DateValueStream.AbstractDateValueStream;
+import org.apache.solr.analytics.value.constant.ConstantStringValue;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.util.DateMathParser;

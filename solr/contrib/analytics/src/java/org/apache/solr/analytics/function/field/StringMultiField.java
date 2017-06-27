@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.SortedSetDocValues;
-import org.apache.solr.analytics.values.StringValueStream.CastingStringValueStream;
+import org.apache.solr.analytics.value.StringValueStream.CastingStringValueStream;
 import org.apache.solr.schema.StrField;
 
 /**

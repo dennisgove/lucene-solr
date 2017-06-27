@@ -26,14 +26,14 @@ import org.apache.solr.analytics.function.reduction.data.SortedListCollector.Sor
 import org.apache.solr.analytics.function.reduction.data.SortedListCollector.SortedFloatListCollector;
 import org.apache.solr.analytics.function.reduction.data.SortedListCollector.SortedIntListCollector;
 import org.apache.solr.analytics.function.reduction.data.SortedListCollector.SortedLongListCollector;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.DateValueStream;
-import org.apache.solr.analytics.values.DoubleValueStream;
-import org.apache.solr.analytics.values.FloatValueStream;
-import org.apache.solr.analytics.values.IntValueStream;
-import org.apache.solr.analytics.values.LongValueStream;
-import org.apache.solr.analytics.values.DateValue.AbstractDateValue;
-import org.apache.solr.analytics.values.DoubleValue.AbstractDoubleValue;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.DateValueStream;
+import org.apache.solr.analytics.value.DoubleValueStream;
+import org.apache.solr.analytics.value.FloatValueStream;
+import org.apache.solr.analytics.value.IntValueStream;
+import org.apache.solr.analytics.value.LongValueStream;
+import org.apache.solr.analytics.value.DateValue.AbstractDateValue;
+import org.apache.solr.analytics.value.DoubleValue.AbstractDoubleValue;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 

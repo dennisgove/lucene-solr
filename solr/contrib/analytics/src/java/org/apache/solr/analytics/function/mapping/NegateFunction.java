@@ -17,12 +17,12 @@
 package org.apache.solr.analytics.function.mapping;
 
 import org.apache.solr.analytics.ExpressionFactory.CreatorFunction;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.BooleanValueStream;
-import org.apache.solr.analytics.values.DoubleValueStream;
-import org.apache.solr.analytics.values.FloatValueStream;
-import org.apache.solr.analytics.values.IntValueStream;
-import org.apache.solr.analytics.values.LongValueStream;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.BooleanValueStream;
+import org.apache.solr.analytics.value.DoubleValueStream;
+import org.apache.solr.analytics.value.FloatValueStream;
+import org.apache.solr.analytics.value.IntValueStream;
+import org.apache.solr.analytics.value.LongValueStream;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 

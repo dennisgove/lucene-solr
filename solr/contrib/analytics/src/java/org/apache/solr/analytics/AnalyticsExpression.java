@@ -18,7 +18,7 @@ package org.apache.solr.analytics;
 
 import org.apache.solr.analytics.function.ReductionCollectionManager;
 import org.apache.solr.analytics.function.ReductionCollectionManager.ReductionDataCollection;
-import org.apache.solr.analytics.values.AnalyticsValue;
+import org.apache.solr.analytics.value.AnalyticsValue;
 
 /**
  * A wrapper for a top-level analytics expression.

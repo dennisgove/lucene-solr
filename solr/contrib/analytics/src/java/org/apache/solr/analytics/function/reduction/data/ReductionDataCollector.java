@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 
 import org.apache.solr.analytics.function.ReductionFunction;
 import org.apache.solr.analytics.stream.reservation.ReductionDataReservation;
-import org.apache.solr.analytics.values.AnalyticsValue;
+import org.apache.solr.analytics.value.AnalyticsValue;
 
 /**
  * Manager of a specific instance of {@link ReductionData} collection. 

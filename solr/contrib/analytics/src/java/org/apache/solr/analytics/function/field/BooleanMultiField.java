@@ -24,7 +24,7 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.SortedSetDocValues;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.analytics.util.function.BooleanConsumer;
-import org.apache.solr.analytics.values.BooleanValueStream.CastingBooleanValueStream;
+import org.apache.solr.analytics.value.BooleanValueStream.CastingBooleanValueStream;
 import org.apache.solr.schema.BoolField;
 
 

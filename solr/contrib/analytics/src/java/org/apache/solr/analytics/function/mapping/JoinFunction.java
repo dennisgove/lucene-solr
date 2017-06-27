@@ -19,10 +19,10 @@ package org.apache.solr.analytics.function.mapping;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.analytics.ExpressionFactory.CreatorFunction;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.StringValue;
-import org.apache.solr.analytics.values.StringValueStream;
-import org.apache.solr.analytics.values.constant.ConstantStringValue;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.StringValue;
+import org.apache.solr.analytics.value.StringValueStream;
+import org.apache.solr.analytics.value.constant.ConstantStringValue;
 
 /**
  * A string join mapping function.

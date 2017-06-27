@@ -19,7 +19,7 @@ package org.apache.solr.analytics.function;
 import java.util.function.UnaryOperator;
 
 import org.apache.solr.analytics.function.reduction.data.ReductionDataCollector;
-import org.apache.solr.analytics.values.AnalyticsValue;
+import org.apache.solr.analytics.value.AnalyticsValue;
 
 /**
  * A function that reduces the values of a mapping expression, field or constant.

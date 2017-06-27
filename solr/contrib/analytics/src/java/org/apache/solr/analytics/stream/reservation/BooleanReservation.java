@@ -20,6 +20,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.util.function.BooleanSupplier;
 
+import org.apache.solr.analytics.stream.reservation.read.BooleanDataReader;
+import org.apache.solr.analytics.stream.reservation.write.BooleanDataWriter;
 import org.apache.solr.analytics.util.function.BooleanConsumer;
 
 public class BooleanReservation extends ReductionDataReservation<BooleanConsumer, BooleanSupplier> {

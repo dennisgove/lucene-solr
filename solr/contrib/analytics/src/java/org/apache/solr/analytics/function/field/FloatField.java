@@ -24,9 +24,9 @@ import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.util.NumericUtils;
-import org.apache.solr.analytics.util.comparator.ExpressionComparator;
+import org.apache.solr.analytics.facet.compare.ExpressionComparator;
 import org.apache.solr.analytics.util.function.FloatConsumer;
-import org.apache.solr.analytics.values.FloatValue.CastingFloatValue;
+import org.apache.solr.analytics.value.FloatValue.CastingFloatValue;
 import org.apache.solr.schema.FloatPointField;
 import org.apache.solr.schema.TrieFloatField;
 

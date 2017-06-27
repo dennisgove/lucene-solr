@@ -23,15 +23,15 @@ import java.util.Locale;
 import java.util.function.LongConsumer;
 
 import org.apache.solr.analytics.ExpressionFactory.CreatorFunction;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.DateValue;
-import org.apache.solr.analytics.values.DateValueStream;
-import org.apache.solr.analytics.values.LongValue;
-import org.apache.solr.analytics.values.LongValueStream;
-import org.apache.solr.analytics.values.StringValue;
-import org.apache.solr.analytics.values.StringValueStream;
-import org.apache.solr.analytics.values.DateValue.AbstractDateValue;
-import org.apache.solr.analytics.values.DateValueStream.AbstractDateValueStream;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.DateValue;
+import org.apache.solr.analytics.value.DateValueStream;
+import org.apache.solr.analytics.value.LongValue;
+import org.apache.solr.analytics.value.LongValueStream;
+import org.apache.solr.analytics.value.StringValue;
+import org.apache.solr.analytics.value.StringValueStream;
+import org.apache.solr.analytics.value.DateValue.AbstractDateValue;
+import org.apache.solr.analytics.value.DateValueStream.AbstractDateValueStream;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 

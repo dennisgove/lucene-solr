@@ -22,6 +22,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
+import org.apache.solr.analytics.stream.reservation.read.DoubleCheckedDataReader;
+import org.apache.solr.analytics.stream.reservation.write.DoubleCheckedDataWriter;
+
 public class DoubleCheckedReservation extends ReductionCheckedDataReservation<DoubleConsumer, DoubleSupplier> {
   
   public DoubleCheckedReservation(DoubleConsumer applier, DoubleSupplier extractor, BooleanSupplier exists) {

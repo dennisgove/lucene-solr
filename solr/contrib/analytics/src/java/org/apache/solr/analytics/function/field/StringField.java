@@ -22,8 +22,8 @@ import java.util.function.Consumer;
 import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.LeafReaderContext;
-import org.apache.solr.analytics.util.comparator.ExpressionComparator;
-import org.apache.solr.analytics.values.StringValue.CastingStringValue;
+import org.apache.solr.analytics.facet.compare.ExpressionComparator;
+import org.apache.solr.analytics.value.StringValue.CastingStringValue;
 import org.apache.solr.schema.StrField;
 
 /**

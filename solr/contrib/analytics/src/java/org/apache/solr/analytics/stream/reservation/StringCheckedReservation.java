@@ -19,6 +19,10 @@ package org.apache.solr.analytics.stream.reservation;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.util.function.Supplier;
+
+import org.apache.solr.analytics.stream.reservation.read.StringCheckedDataReader;
+import org.apache.solr.analytics.stream.reservation.write.StringCheckedDataWriter;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 

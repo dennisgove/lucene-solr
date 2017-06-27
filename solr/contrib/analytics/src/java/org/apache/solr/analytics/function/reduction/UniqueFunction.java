@@ -27,13 +27,13 @@ import org.apache.solr.analytics.function.reduction.data.UniqueCollector.UniqueF
 import org.apache.solr.analytics.function.reduction.data.UniqueCollector.UniqueIntCollector;
 import org.apache.solr.analytics.function.reduction.data.UniqueCollector.UniqueLongCollector;
 import org.apache.solr.analytics.function.reduction.data.UniqueCollector.UniqueStringCollector;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.DoubleValueStream;
-import org.apache.solr.analytics.values.FloatValueStream;
-import org.apache.solr.analytics.values.IntValueStream;
-import org.apache.solr.analytics.values.LongValueStream;
-import org.apache.solr.analytics.values.StringValueStream;
-import org.apache.solr.analytics.values.LongValue.AbstractLongValue;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.DoubleValueStream;
+import org.apache.solr.analytics.value.FloatValueStream;
+import org.apache.solr.analytics.value.IntValueStream;
+import org.apache.solr.analytics.value.LongValueStream;
+import org.apache.solr.analytics.value.StringValueStream;
+import org.apache.solr.analytics.value.LongValue.AbstractLongValue;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 

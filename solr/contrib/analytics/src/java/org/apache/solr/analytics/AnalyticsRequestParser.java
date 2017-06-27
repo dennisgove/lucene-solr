@@ -33,13 +33,13 @@ import org.apache.solr.analytics.facet.QueryFacet;
 import org.apache.solr.analytics.facet.RangeFacet;
 import org.apache.solr.analytics.facet.ValueFacet;
 import org.apache.solr.analytics.facet.SortableFacet.FacetSortSpecification;
-import org.apache.solr.analytics.util.comparator.DelegatingComparator;
-import org.apache.solr.analytics.util.comparator.FacetValueComparator;
-import org.apache.solr.analytics.util.comparator.ResultsComparator;
-import org.apache.solr.analytics.values.AnalyticsValue;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.ComparableValue;
-import org.apache.solr.analytics.values.StringValueStream;
+import org.apache.solr.analytics.facet.compare.DelegatingComparator;
+import org.apache.solr.analytics.facet.compare.FacetValueComparator;
+import org.apache.solr.analytics.facet.compare.FacetResultsComparator;
+import org.apache.solr.analytics.value.AnalyticsValue;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.ComparableValue;
+import org.apache.solr.analytics.value.StringValueStream;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.FacetParams.FacetRangeInclude;
@@ -502,10 +502,10 @@ public class AnalyticsRequestParser {
     return new FacetSortSpecification(constructSortCriteria(sortRequest.criteria, expressions), sortRequest.limit, sortRequest.offset);
   }
 
-  private static ResultsComparator constructSortCriteria(List<AnalyticsSortCriteriaRequest> criteria, Map<String, AnalyticsExpression> expressions) {
-    ArrayList<ResultsComparator> comparators = new ArrayList<>();
+  private static FacetResultsComparator constructSortCriteria(List<AnalyticsSortCriteriaRequest> criteria, Map<String, AnalyticsExpression> expressions) {
+    ArrayList<FacetResultsComparator> comparators = new ArrayList<>();
     for (AnalyticsSortCriteriaRequest criterion : criteria) {
-      ResultsComparator comparator;
+      FacetResultsComparator comparator;
       if (criterion instanceof AnalyticsExpressionSortRequest) {
         comparator = constructExpressionSortCriteria((AnalyticsExpressionSortRequest) criterion, expressions);
       } else if (criterion instanceof AnalyticsFacetValueSortRequest) {
@@ -528,7 +528,7 @@ public class AnalyticsRequestParser {
     return DelegatingComparator.joinComparators(comparators);
   }
   
-  private static ResultsComparator constructExpressionSortCriteria(AnalyticsExpressionSortRequest criterion, Map<String, AnalyticsExpression> expressions) {
+  private static FacetResultsComparator constructExpressionSortCriteria(AnalyticsExpressionSortRequest criterion, Map<String, AnalyticsExpression> expressions) {
     if (criterion.expression == null || criterion.expression.length() == 0) {
       throw new SolrException(ErrorCode.BAD_REQUEST,"Expression Sorts must contain an expression parameter, none given.");
     }
@@ -543,7 +543,7 @@ public class AnalyticsRequestParser {
     return ((ComparableValue)expression.getExpression()).getObjectComparator(expression.getName());
   }
   
-  private static ResultsComparator constructFacetValueSortCriteria(AnalyticsFacetValueSortRequest criterion) {
+  private static FacetResultsComparator constructFacetValueSortCriteria(AnalyticsFacetValueSortRequest criterion) {
     return new FacetValueComparator();
   }
 }

@@ -22,6 +22,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
+import org.apache.solr.analytics.stream.reservation.read.BooleanDataArrayReader;
+import org.apache.solr.analytics.stream.reservation.write.BooleanDataArrayWriter;
 import org.apache.solr.analytics.util.function.BooleanConsumer;
 
 public class BooleanArrayReservation extends ReductionDataArrayReservation<BooleanConsumer, BooleanSupplier> {

@@ -24,8 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.solr.analytics.facet.compare.FacetResultsComparator;
 import org.apache.solr.analytics.util.AnalyticsResponseHeadings;
-import org.apache.solr.analytics.util.comparator.ResultsComparator;
 import org.apache.solr.common.util.NamedList;
 
 import com.google.common.collect.Iterables;
@@ -105,17 +105,17 @@ public abstract class SortableFacet extends AnalyticsFacet {
    * Specifies how to sort the buckets of a sortable facet.
    */
   public static class FacetSortSpecification {
-    private ResultsComparator comparator;
+    private FacetResultsComparator comparator;
     protected int limit;
     protected int offset;
     
-    public FacetSortSpecification(ResultsComparator comparator, int limit, int offset) {
+    public FacetSortSpecification(FacetResultsComparator comparator, int limit, int offset) {
       this.comparator = comparator;
       this.limit = limit;
       this.offset = offset;
     }
 
-    public ResultsComparator getComparator() {
+    public FacetResultsComparator getComparator() {
       return comparator;
     }
 

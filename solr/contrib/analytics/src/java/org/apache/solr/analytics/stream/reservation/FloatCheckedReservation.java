@@ -20,6 +20,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.util.function.BooleanSupplier;
 
+import org.apache.solr.analytics.stream.reservation.read.FloatCheckedDataReader;
+import org.apache.solr.analytics.stream.reservation.write.FloatCheckedDataWriter;
 import org.apache.solr.analytics.util.function.FloatConsumer;
 import org.apache.solr.analytics.util.function.FloatSupplier;
 

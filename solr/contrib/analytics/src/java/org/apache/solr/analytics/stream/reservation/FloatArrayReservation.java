@@ -21,6 +21,8 @@ import java.io.DataOutput;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
+import org.apache.solr.analytics.stream.reservation.read.FloatDataArrayReader;
+import org.apache.solr.analytics.stream.reservation.write.FloatDataArrayWriter;
 import org.apache.solr.analytics.util.function.FloatConsumer;
 import org.apache.solr.analytics.util.function.FloatSupplier;
 

@@ -19,7 +19,7 @@ package org.apache.solr.analytics.function.field;
 import java.io.IOException;
 
 import org.apache.lucene.index.LeafReaderContext;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
 
 /**
  * An analytics wrapper for Solr Fields. 

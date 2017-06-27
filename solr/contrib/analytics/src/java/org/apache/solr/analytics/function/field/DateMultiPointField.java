@@ -20,7 +20,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.function.Consumer;
 
-import org.apache.solr.analytics.values.DateValueStream.CastingDateValueStream;
+import org.apache.solr.analytics.value.DateValueStream.CastingDateValueStream;
 import org.apache.solr.schema.DatePointField;
 
 /**

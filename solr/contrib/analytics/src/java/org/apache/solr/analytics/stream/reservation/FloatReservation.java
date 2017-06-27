@@ -19,6 +19,8 @@ package org.apache.solr.analytics.stream.reservation;
 import java.io.DataInput;
 import java.io.DataOutput;
 
+import org.apache.solr.analytics.stream.reservation.read.FloatDataReader;
+import org.apache.solr.analytics.stream.reservation.write.FloatDataWriter;
 import org.apache.solr.analytics.util.function.FloatConsumer;
 import org.apache.solr.analytics.util.function.FloatSupplier;
 

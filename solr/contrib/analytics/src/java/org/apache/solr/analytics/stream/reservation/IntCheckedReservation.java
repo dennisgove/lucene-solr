@@ -22,6 +22,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
+import org.apache.solr.analytics.stream.reservation.read.IntCheckedDataReader;
+import org.apache.solr.analytics.stream.reservation.write.IntCheckedDataWriter;
+
 public class IntCheckedReservation extends ReductionCheckedDataReservation<IntConsumer, IntSupplier> {
   
   public IntCheckedReservation(IntConsumer applier, IntSupplier extractor, BooleanSupplier exists) {

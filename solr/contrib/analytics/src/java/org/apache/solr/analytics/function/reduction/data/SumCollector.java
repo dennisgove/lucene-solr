@@ -21,8 +21,8 @@ import java.util.function.Consumer;
 import org.apache.solr.analytics.function.reduction.data.ReductionData;
 import org.apache.solr.analytics.stream.reservation.DoubleCheckedReservation;
 import org.apache.solr.analytics.stream.reservation.ReductionDataReservation;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.DoubleValueStream;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.DoubleValueStream;
 
 /**
  * Collects the sum of the given {@link DoubleValueStream} parameter. 

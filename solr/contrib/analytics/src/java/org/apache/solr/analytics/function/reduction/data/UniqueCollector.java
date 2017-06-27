@@ -28,12 +28,12 @@ import org.apache.solr.analytics.stream.reservation.IntArrayReservation;
 import org.apache.solr.analytics.stream.reservation.LongArrayReservation;
 import org.apache.solr.analytics.stream.reservation.ReductionDataReservation;
 import org.apache.solr.analytics.stream.reservation.StringArrayReservation;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.DoubleValueStream;
-import org.apache.solr.analytics.values.FloatValueStream;
-import org.apache.solr.analytics.values.IntValueStream;
-import org.apache.solr.analytics.values.LongValueStream;
-import org.apache.solr.analytics.values.StringValueStream;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.DoubleValueStream;
+import org.apache.solr.analytics.value.FloatValueStream;
+import org.apache.solr.analytics.value.IntValueStream;
+import org.apache.solr.analytics.value.LongValueStream;
+import org.apache.solr.analytics.value.StringValueStream;
 
 /**
  * Collects the number of unique values that exist for the given parameter. 

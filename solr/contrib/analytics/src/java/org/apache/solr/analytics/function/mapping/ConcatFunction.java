@@ -19,8 +19,8 @@ package org.apache.solr.analytics.function.mapping;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.analytics.ExpressionFactory.CreatorFunction;
-import org.apache.solr.analytics.values.StringValue;
-import org.apache.solr.analytics.values.constant.ConstantStringValue;
+import org.apache.solr.analytics.value.StringValue;
+import org.apache.solr.analytics.value.constant.ConstantStringValue;
 
 /**
  * A concatenation mapping function, combining the string values of the given parameters. (At least 1 parameter is required)

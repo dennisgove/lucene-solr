@@ -21,37 +21,49 @@ import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
 
+import org.apache.solr.analytics.function.mapping.LambdaFunction.BoolInBoolOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.DoubleInDoubleOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.FloatInFloatOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.IntInIntOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.LongInLongOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.StringInStringOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.TwoBoolInBoolOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.TwoDoubleInDoubleOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.TwoFloatInFloatOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.TwoIntInIntOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.TwoLongInLongOutLambda;
+import org.apache.solr.analytics.function.mapping.LambdaFunction.TwoStringInStringOutLambda;
 import org.apache.solr.analytics.util.function.BooleanConsumer;
 import org.apache.solr.analytics.util.function.FloatConsumer;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.BooleanValue;
-import org.apache.solr.analytics.values.BooleanValueStream;
-import org.apache.solr.analytics.values.DateValue;
-import org.apache.solr.analytics.values.DateValueStream;
-import org.apache.solr.analytics.values.DoubleValue;
-import org.apache.solr.analytics.values.DoubleValueStream;
-import org.apache.solr.analytics.values.FloatValue;
-import org.apache.solr.analytics.values.FloatValueStream;
-import org.apache.solr.analytics.values.IntValue;
-import org.apache.solr.analytics.values.IntValueStream;
-import org.apache.solr.analytics.values.LongValue;
-import org.apache.solr.analytics.values.LongValueStream;
-import org.apache.solr.analytics.values.StringValue;
-import org.apache.solr.analytics.values.StringValueStream;
-import org.apache.solr.analytics.values.BooleanValue.AbstractBooleanValue;
-import org.apache.solr.analytics.values.BooleanValueStream.AbstractBooleanValueStream;
-import org.apache.solr.analytics.values.DateValue.AbstractDateValue;
-import org.apache.solr.analytics.values.DateValueStream.AbstractDateValueStream;
-import org.apache.solr.analytics.values.DoubleValue.AbstractDoubleValue;
-import org.apache.solr.analytics.values.DoubleValueStream.AbstractDoubleValueStream;
-import org.apache.solr.analytics.values.FloatValue.AbstractFloatValue;
-import org.apache.solr.analytics.values.FloatValueStream.AbstractFloatValueStream;
-import org.apache.solr.analytics.values.IntValue.AbstractIntValue;
-import org.apache.solr.analytics.values.IntValueStream.AbstractIntValueStream;
-import org.apache.solr.analytics.values.LongValue.AbstractLongValue;
-import org.apache.solr.analytics.values.LongValueStream.AbstractLongValueStream;
-import org.apache.solr.analytics.values.StringValue.AbstractStringValue;
-import org.apache.solr.analytics.values.StringValueStream.AbstractStringValueStream;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.BooleanValue;
+import org.apache.solr.analytics.value.BooleanValueStream;
+import org.apache.solr.analytics.value.DateValue;
+import org.apache.solr.analytics.value.DateValueStream;
+import org.apache.solr.analytics.value.DoubleValue;
+import org.apache.solr.analytics.value.DoubleValueStream;
+import org.apache.solr.analytics.value.FloatValue;
+import org.apache.solr.analytics.value.FloatValueStream;
+import org.apache.solr.analytics.value.IntValue;
+import org.apache.solr.analytics.value.IntValueStream;
+import org.apache.solr.analytics.value.LongValue;
+import org.apache.solr.analytics.value.LongValueStream;
+import org.apache.solr.analytics.value.StringValue;
+import org.apache.solr.analytics.value.StringValueStream;
+import org.apache.solr.analytics.value.BooleanValue.AbstractBooleanValue;
+import org.apache.solr.analytics.value.BooleanValueStream.AbstractBooleanValueStream;
+import org.apache.solr.analytics.value.DateValue.AbstractDateValue;
+import org.apache.solr.analytics.value.DateValueStream.AbstractDateValueStream;
+import org.apache.solr.analytics.value.DoubleValue.AbstractDoubleValue;
+import org.apache.solr.analytics.value.DoubleValueStream.AbstractDoubleValueStream;
+import org.apache.solr.analytics.value.FloatValue.AbstractFloatValue;
+import org.apache.solr.analytics.value.FloatValueStream.AbstractFloatValueStream;
+import org.apache.solr.analytics.value.IntValue.AbstractIntValue;
+import org.apache.solr.analytics.value.IntValueStream.AbstractIntValueStream;
+import org.apache.solr.analytics.value.LongValue.AbstractLongValue;
+import org.apache.solr.analytics.value.LongValueStream.AbstractLongValueStream;
+import org.apache.solr.analytics.value.StringValue.AbstractStringValue;
+import org.apache.solr.analytics.value.StringValueStream.AbstractStringValueStream;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 
@@ -781,6 +793,171 @@ public class LambdaFunction {
       return new MultiStringValueInStringValueOutRequireOneFunction(name,lambda,params);
     }
   }
+  
+
+  /*
+   * Single Parameter
+   */
+  // Boolean Out
+  @FunctionalInterface
+  public static interface BoolInBoolOutLambda   { boolean apply(boolean a); }
+  @FunctionalInterface
+  public static interface IntInBoolOutLambda    { boolean apply(int     a); }
+  @FunctionalInterface
+  public static interface LongInBoolOutLambda   { boolean apply(long    a); }
+  @FunctionalInterface
+  public static interface FloatInBoolOutLambda  { boolean apply(float   a); }
+  @FunctionalInterface
+  public static interface DoubleInBoolOutLambda { boolean apply(double  a); }
+  @FunctionalInterface
+  public static interface StringInBoolOutLambda { boolean apply(double  a); }
+  // Int Out
+  @FunctionalInterface
+  public static interface BoolInIntOutLambda   { int apply(boolean a); }
+  @FunctionalInterface
+  public static interface IntInIntOutLambda    { int apply(int     a); }
+  @FunctionalInterface
+  public static interface LongInIntOutLambda   { int apply(long    a); }
+  @FunctionalInterface
+  public static interface FloatInIntOutLambda  { int apply(float   a); }
+  @FunctionalInterface
+  public static interface DoubleInIntOutLambda { int apply(double  a); }
+  @FunctionalInterface
+  public static interface StringInIntOutLambda { int apply(double  a); }
+  // Long Out
+  @FunctionalInterface
+  public static interface BoolInLongOutLambda   { long apply(boolean a); }
+  @FunctionalInterface
+  public static interface IntInLongOutLambda    { long apply(int     a); }
+  @FunctionalInterface
+  public static interface LongInLongOutLambda   { long apply(long    a); }
+  @FunctionalInterface
+  public static interface FloatInLongOutLambda  { long apply(float   a); }
+  @FunctionalInterface
+  public static interface DoubleInLongOutLambda { long apply(double  a); }
+  @FunctionalInterface
+  public static interface StringInLongOutLambda { long apply(double  a); }
+  // Float Out
+  @FunctionalInterface
+  public static interface BoolInFloatOutLambda   { float apply(boolean a); }
+  @FunctionalInterface
+  public static interface IntInFloatOutLambda    { float apply(int     a); }
+  @FunctionalInterface
+  public static interface LongInFloatOutLambda   { float apply(long    a); }
+  @FunctionalInterface
+  public static interface FloatInFloatOutLambda  { float apply(float   a); }
+  @FunctionalInterface
+  public static interface DoubleInFloatOutLambda { float apply(double  a); }
+  @FunctionalInterface
+  public static interface StringInFloatOutLambda { float apply(String  a); }
+  //Double Out
+  @FunctionalInterface
+  public static interface BoolInDoubleOutLambda   { double apply(boolean a); }
+  @FunctionalInterface
+  public static interface IntInDoubleOutLambda    { double apply(int     a); }
+  @FunctionalInterface
+  public static interface LongInDoubleOutLambda   { double apply(long    a); }
+  @FunctionalInterface
+  public static interface FloatInDoubleOutLambda  { double apply(float   a); }
+  @FunctionalInterface
+  public static interface DoubleInDoubleOutLambda { double apply(double  a); }
+  @FunctionalInterface
+  public static interface StringInDoubleOutLambda { double apply(String  a); }
+  //String Out
+  @FunctionalInterface
+  public static interface BoolInStringOutLambda   { String apply(boolean a); }
+  @FunctionalInterface
+  public static interface IntInStringOutLambda    { String apply(int     a); }
+  @FunctionalInterface
+  public static interface LongInStringOutLambda   { String apply(long    a); }
+  @FunctionalInterface
+  public static interface FloatInStringOutLambda  { String apply(float   a); }
+  @FunctionalInterface
+  public static interface DoubleInStringOutLambda { String apply(double  a); }
+  @FunctionalInterface
+  public static interface StringInStringOutLambda { String apply(String  a); }
+  
+  /*
+   * Two Parameters
+   */
+  //Boolean Out
+  @FunctionalInterface
+  public static interface TwoBoolInBoolOutLambda   { boolean apply(boolean a, boolean b); }
+  @FunctionalInterface
+  public static interface TwoIntInBoolOutLambda    { boolean apply(int     a, int     b); }
+  @FunctionalInterface
+  public static interface TwoLongInBoolOutLambda   { boolean apply(long    a, long    b); }
+  @FunctionalInterface
+  public static interface TwoFloatInBoolOutLambda  { boolean apply(float   a, float   b); }
+  @FunctionalInterface
+  public static interface TwoDoubleInBoolOutLambda { boolean apply(double  a, double  b); }
+  @FunctionalInterface
+  public static interface TwoStringInBoolOutLambda { boolean apply(double  a, double  b); }
+  //Int Out
+  @FunctionalInterface
+  public static interface TwoBoolInIntOutLambda   { int apply(boolean a, boolean b); }
+  @FunctionalInterface
+  public static interface TwoIntInIntOutLambda    { int apply(int     a, int     b); }
+  @FunctionalInterface
+  public static interface TwoLongInIntOutLambda   { int apply(long    a, long    b); }
+  @FunctionalInterface
+  public static interface TwoFloatInIntOutLambda  { int apply(float   a, float   b); }
+  @FunctionalInterface
+  public static interface TwoDoubleInIntOutLambda { int apply(double  a, double  b); }
+  @FunctionalInterface
+  public static interface TwoStringInIntOutLambda { int apply(double  a, double  b); }
+  //Long Out
+  @FunctionalInterface
+  public static interface TwoBoolInLongOutLambda   { long apply(boolean a, boolean b); }
+  @FunctionalInterface
+  public static interface TwoIntInLongOutLambda    { long apply(int     a, int     b); }
+  @FunctionalInterface
+  public static interface TwoLongInLongOutLambda   { long apply(long    a, long    b); }
+  @FunctionalInterface
+  public static interface TwoFloatInLongOutLambda  { long apply(float   a, float   b); }
+  @FunctionalInterface
+  public static interface TwoDoubleInLongOutLambda { long apply(double  a, double  b); }
+  @FunctionalInterface
+  public static interface TwoStringInLongOutLambda { long apply(double  a, double  b); }
+  //Float Out
+  @FunctionalInterface
+  public static interface TwoBoolInFloatOutLambda   { float apply(boolean a, boolean b); }
+  @FunctionalInterface
+  public static interface TwoIntInFloatOutLambda    { float apply(int     a, int     b); }
+  @FunctionalInterface
+  public static interface TwoLongInFloatOutLambda   { float apply(long    a, long    b); }
+  @FunctionalInterface
+  public static interface TwoFloatInFloatOutLambda  { float apply(float   a, float   b); }
+  @FunctionalInterface
+  public static interface TwoDoubleInFloatOutLambda { float apply(double  a, double  b); }
+  @FunctionalInterface
+  public static interface TwoStringInFloatOutLambda { float apply(String  a, String  b); }
+  //Double Out
+  @FunctionalInterface
+  public static interface TwoBoolInDoubleOutLambda   { double apply(boolean a, boolean b); }
+  @FunctionalInterface
+  public static interface TwoIntInDoubleOutLambda    { double apply(int     a, int     b); }
+  @FunctionalInterface
+  public static interface TwoLongInDoubleOutLambda   { double apply(long    a, long    b); }
+  @FunctionalInterface
+  public static interface TwoFloatInDoubleOutLambda  { double apply(float   a, float   b); }
+  @FunctionalInterface
+  public static interface TwoDoubleInDoubleOutLambda { double apply(double  a, double  b); }
+  @FunctionalInterface
+  public static interface TwoStringInDoubleOutLambda { double apply(String  a, String  b); }
+  //String Out
+  @FunctionalInterface
+  public static interface TwoBoolInStringOutLambda   { String apply(boolean a, boolean b); }
+  @FunctionalInterface
+  public static interface TwoIntInStringOutLambda    { String apply(int     a, int     b); }
+  @FunctionalInterface
+  public static interface TwoLongInStringOutLambda   { String apply(long    a, long    b); }
+  @FunctionalInterface
+  public static interface TwoFloatInStringOutLambda  { String apply(float   a, float   b); }
+  @FunctionalInterface
+  public static interface TwoDoubleInStringOutLambda { String apply(double  a, double  b); }
+  @FunctionalInterface
+  public static interface TwoStringInStringOutLambda { String apply(String  a, String  b); }
 } 
 class BooleanValueInBooleanValueOutFunction extends AbstractBooleanValue {
   private final BooleanValue param;
@@ -3041,167 +3218,3 @@ class MultiStringValueInStringValueOutRequireOneFunction extends MultiStringValu
     return value;
   }
 }
-
-/*
- * Single Parameter
- */
-// Boolean Out
-@FunctionalInterface
-interface BoolInBoolOutLambda   { boolean apply(boolean a); }
-@FunctionalInterface
-interface IntInBoolOutLambda    { boolean apply(int     a); }
-@FunctionalInterface
-interface LongInBoolOutLambda   { boolean apply(long    a); }
-@FunctionalInterface
-interface FloatInBoolOutLambda  { boolean apply(float   a); }
-@FunctionalInterface
-interface DoubleInBoolOutLambda { boolean apply(double  a); }
-@FunctionalInterface
-interface StringInBoolOutLambda { boolean apply(double  a); }
-// Int Out
-@FunctionalInterface
-interface BoolInIntOutLambda   { int apply(boolean a); }
-@FunctionalInterface
-interface IntInIntOutLambda    { int apply(int     a); }
-@FunctionalInterface
-interface LongInIntOutLambda   { int apply(long    a); }
-@FunctionalInterface
-interface FloatInIntOutLambda  { int apply(float   a); }
-@FunctionalInterface
-interface DoubleInIntOutLambda { int apply(double  a); }
-@FunctionalInterface
-interface StringInIntOutLambda { int apply(double  a); }
-// Long Out
-@FunctionalInterface
-interface BoolInLongOutLambda   { long apply(boolean a); }
-@FunctionalInterface
-interface IntInLongOutLambda    { long apply(int     a); }
-@FunctionalInterface
-interface LongInLongOutLambda   { long apply(long    a); }
-@FunctionalInterface
-interface FloatInLongOutLambda  { long apply(float   a); }
-@FunctionalInterface
-interface DoubleInLongOutLambda { long apply(double  a); }
-@FunctionalInterface
-interface StringInLongOutLambda { long apply(double  a); }
-// Float Out
-@FunctionalInterface
-interface BoolInFloatOutLambda   { float apply(boolean a); }
-@FunctionalInterface
-interface IntInFloatOutLambda    { float apply(int     a); }
-@FunctionalInterface
-interface LongInFloatOutLambda   { float apply(long    a); }
-@FunctionalInterface
-interface FloatInFloatOutLambda  { float apply(float   a); }
-@FunctionalInterface
-interface DoubleInFloatOutLambda { float apply(double  a); }
-@FunctionalInterface
-interface StringInFloatOutLambda { float apply(String  a); }
-//Double Out
-@FunctionalInterface
-interface BoolInDoubleOutLambda   { double apply(boolean a); }
-@FunctionalInterface
-interface IntInDoubleOutLambda    { double apply(int     a); }
-@FunctionalInterface
-interface LongInDoubleOutLambda   { double apply(long    a); }
-@FunctionalInterface
-interface FloatInDoubleOutLambda  { double apply(float   a); }
-@FunctionalInterface
-interface DoubleInDoubleOutLambda { double apply(double  a); }
-@FunctionalInterface
-interface StringInDoubleOutLambda { double apply(String  a); }
-//String Out
-@FunctionalInterface
-interface BoolInStringOutLambda   { String apply(boolean a); }
-@FunctionalInterface
-interface IntInStringOutLambda    { String apply(int     a); }
-@FunctionalInterface
-interface LongInStringOutLambda   { String apply(long    a); }
-@FunctionalInterface
-interface FloatInStringOutLambda  { String apply(float   a); }
-@FunctionalInterface
-interface DoubleInStringOutLambda { String apply(double  a); }
-@FunctionalInterface
-interface StringInStringOutLambda { String apply(String  a); }
-
-/*
- * Two Parameters
- */
-//Boolean Out
-@FunctionalInterface
-interface TwoBoolInBoolOutLambda   { boolean apply(boolean a, boolean b); }
-@FunctionalInterface
-interface TwoIntInBoolOutLambda    { boolean apply(int     a, int     b); }
-@FunctionalInterface
-interface TwoLongInBoolOutLambda   { boolean apply(long    a, long    b); }
-@FunctionalInterface
-interface TwoFloatInBoolOutLambda  { boolean apply(float   a, float   b); }
-@FunctionalInterface
-interface TwoDoubleInBoolOutLambda { boolean apply(double  a, double  b); }
-@FunctionalInterface
-interface TwoStringInBoolOutLambda { boolean apply(double  a, double  b); }
-//Int Out
-@FunctionalInterface
-interface TwoBoolInIntOutLambda   { int apply(boolean a, boolean b); }
-@FunctionalInterface
-interface TwoIntInIntOutLambda    { int apply(int     a, int     b); }
-@FunctionalInterface
-interface TwoLongInIntOutLambda   { int apply(long    a, long    b); }
-@FunctionalInterface
-interface TwoFloatInIntOutLambda  { int apply(float   a, float   b); }
-@FunctionalInterface
-interface TwoDoubleInIntOutLambda { int apply(double  a, double  b); }
-@FunctionalInterface
-interface TwoStringInIntOutLambda { int apply(double  a, double  b); }
-//Long Out
-@FunctionalInterface
-interface TwoBoolInLongOutLambda   { long apply(boolean a, boolean b); }
-@FunctionalInterface
-interface TwoIntInLongOutLambda    { long apply(int     a, int     b); }
-@FunctionalInterface
-interface TwoLongInLongOutLambda   { long apply(long    a, long    b); }
-@FunctionalInterface
-interface TwoFloatInLongOutLambda  { long apply(float   a, float   b); }
-@FunctionalInterface
-interface TwoDoubleInLongOutLambda { long apply(double  a, double  b); }
-@FunctionalInterface
-interface TwoStringInLongOutLambda { long apply(double  a, double  b); }
-//Float Out
-@FunctionalInterface
-interface TwoBoolInFloatOutLambda   { float apply(boolean a, boolean b); }
-@FunctionalInterface
-interface TwoIntInFloatOutLambda    { float apply(int     a, int     b); }
-@FunctionalInterface
-interface TwoLongInFloatOutLambda   { float apply(long    a, long    b); }
-@FunctionalInterface
-interface TwoFloatInFloatOutLambda  { float apply(float   a, float   b); }
-@FunctionalInterface
-interface TwoDoubleInFloatOutLambda { float apply(double  a, double  b); }
-@FunctionalInterface
-interface TwoStringInFloatOutLambda { float apply(String  a, String  b); }
-//Double Out
-@FunctionalInterface
-interface TwoBoolInDoubleOutLambda   { double apply(boolean a, boolean b); }
-@FunctionalInterface
-interface TwoIntInDoubleOutLambda    { double apply(int     a, int     b); }
-@FunctionalInterface
-interface TwoLongInDoubleOutLambda   { double apply(long    a, long    b); }
-@FunctionalInterface
-interface TwoFloatInDoubleOutLambda  { double apply(float   a, float   b); }
-@FunctionalInterface
-interface TwoDoubleInDoubleOutLambda { double apply(double  a, double  b); }
-@FunctionalInterface
-interface TwoStringInDoubleOutLambda { double apply(String  a, String  b); }
-//String Out
-@FunctionalInterface
-interface TwoBoolInStringOutLambda   { String apply(boolean a, boolean b); }
-@FunctionalInterface
-interface TwoIntInStringOutLambda    { String apply(int     a, int     b); }
-@FunctionalInterface
-interface TwoLongInStringOutLambda   { String apply(long    a, long    b); }
-@FunctionalInterface
-interface TwoFloatInStringOutLambda  { String apply(float   a, float   b); }
-@FunctionalInterface
-interface TwoDoubleInStringOutLambda { String apply(double  a, double  b); }
-@FunctionalInterface
-interface TwoStringInStringOutLambda { String apply(String  a, String  b); }

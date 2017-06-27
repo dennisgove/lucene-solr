@@ -21,6 +21,9 @@ import java.io.DataOutput;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
+import org.apache.solr.analytics.stream.reservation.read.DoubleDataReader;
+import org.apache.solr.analytics.stream.reservation.write.DoubleDataWriter;
+
 public class DoubleReservation extends ReductionDataReservation<DoubleConsumer, DoubleSupplier> {
   
   public DoubleReservation(DoubleConsumer applier, DoubleSupplier extractor) {

@@ -23,9 +23,9 @@ import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.SortedDocValues;
 import org.apache.lucene.util.BytesRef;
-import org.apache.solr.analytics.util.comparator.ExpressionComparator;
+import org.apache.solr.analytics.facet.compare.ExpressionComparator;
 import org.apache.solr.analytics.util.function.BooleanConsumer;
-import org.apache.solr.analytics.values.BooleanValue.CastingBooleanValue;
+import org.apache.solr.analytics.value.BooleanValue.CastingBooleanValue;
 import org.apache.solr.schema.BoolField;
 
 /**

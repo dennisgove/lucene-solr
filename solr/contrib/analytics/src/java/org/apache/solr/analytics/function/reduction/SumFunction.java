@@ -24,9 +24,9 @@ import org.apache.solr.analytics.function.ReductionFunction;
 import org.apache.solr.analytics.function.reduction.data.ReductionData;
 import org.apache.solr.analytics.function.reduction.data.ReductionDataCollector;
 import org.apache.solr.analytics.function.reduction.data.SumCollector;
-import org.apache.solr.analytics.values.AnalyticsValueStream;
-import org.apache.solr.analytics.values.DoubleValueStream;
-import org.apache.solr.analytics.values.DoubleValue.AbstractDoubleValue;
+import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.DoubleValueStream;
+import org.apache.solr.analytics.value.DoubleValue.AbstractDoubleValue;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 

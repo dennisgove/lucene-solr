@@ -20,6 +20,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.util.function.LongConsumer;
 import java.util.function.LongSupplier;
+
+import org.apache.solr.analytics.stream.reservation.read.LongDataArrayReader;
+import org.apache.solr.analytics.stream.reservation.write.LongDataArrayWriter;
+
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 

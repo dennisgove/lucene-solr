@@ -20,6 +20,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 
 import org.apache.solr.analytics.function.reduction.data.ReductionDataCollector;
+import org.apache.solr.analytics.stream.reservation.read.ReductionDataReader;
+import org.apache.solr.analytics.stream.reservation.write.ReductionDataWriter;
 
 /**
  * A reservation allows a {@link ReductionDataCollector} to specify a piece of data it needs to export from the shard.

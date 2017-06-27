@@ -32,7 +32,7 @@ import org.apache.solr.analytics.function.ReductionCollectionManager;
 import org.apache.solr.analytics.function.ReductionCollectionManager.ReductionDataCollection;
 import org.apache.solr.analytics.function.reduction.data.ReductionData;
 import org.apache.solr.analytics.util.AnalyticsResponseHeadings;
-import org.apache.solr.analytics.values.StringValueStream;
+import org.apache.solr.analytics.value.StringValueStream;
 
 /**
  * Representation of one layer of a Pivot Facet. A PivotFacet node is individually sortable,
@@ -174,7 +174,7 @@ public abstract class PivotNode<T> extends SortableFacet implements Consumer<Str
   /**
    * A pivot node that has pivot children.
    */
-  public static class PivotBranch<T> extends PivotNode<PivotDataPair<T>> {
+  public static class PivotBranch<T> extends PivotNode<PivotBranch.PivotDataPair<T>> {
     private final PivotNode<T> childPivot;
     public PivotBranch(String name, StringValueStream expression, PivotNode<T> childPivot) {
       super(name, expression);
@@ -251,12 +251,13 @@ public abstract class PivotNode<T> extends SortableFacet implements Consumer<Str
       }
       return results;
     }
+    
+    /**
+     * Contains pivot data for {@link PivotNode.PivotBranch} classes.
+     */
+    protected static class PivotDataPair<T> {
+      ReductionDataCollection pivotReduction;
+      Map<String,T> childPivots;
+    }
   }
-}
-/**
- * Contains pivot data for {@link PivotNode.PivotBranch} classes.
- */
-class PivotDataPair<T> {
-  ReductionDataCollection pivotReduction;
-  Map<String,T> childPivots;
 }

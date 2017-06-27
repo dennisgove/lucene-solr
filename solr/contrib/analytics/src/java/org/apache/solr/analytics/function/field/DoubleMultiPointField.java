@@ -24,7 +24,7 @@ import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.util.NumericUtils;
-import org.apache.solr.analytics.values.DoubleValueStream.CastingDoubleValueStream;
+import org.apache.solr.analytics.value.DoubleValueStream.CastingDoubleValueStream;
 import org.apache.solr.schema.DoublePointField;
 
 /**
