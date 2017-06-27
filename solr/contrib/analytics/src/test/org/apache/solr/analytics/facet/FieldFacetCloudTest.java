@@ -414,7 +414,7 @@ public class FieldFacetCloudTest extends AbstractAnalyticsFacetCloudTest{
     };
     NamedList<Object> response = queryCloudAnalytics(params);
     String responseStr = response.toString();
-    System.out.println(responseStr);
+
     //Int Date
     Collection<Double> intDate = getValueList(response, "sum", "fieldFacets", "date_dtd", "int", false);
     ArrayList<Double> intDateTest = calculateNumberStat(intDateTestStart, "sum");

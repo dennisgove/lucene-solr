@@ -51,8 +51,8 @@ public class AbstractAnalyticsFacetCloudTest extends SolrCloudTestCase {
   protected static final String id = "id";
 
   public static void setupCluster() throws Exception {
-    configureCluster(4)
-        .addConfig("conf", getFile("solr").toPath().resolve("configsets").resolve("cloud-analytics").resolve("conf"))
+    configureCluster(2)
+        .addConfig("conf", configset("cloud-analytics"))
         .configure();
 
     CollectionAdminRequest.createCollection(COLLECTIONORALIAS, "conf", 2, 1).process(cluster.getSolrClient());

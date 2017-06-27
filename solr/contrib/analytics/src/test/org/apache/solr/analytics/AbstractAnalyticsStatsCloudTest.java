@@ -69,7 +69,7 @@ public class AbstractAnalyticsStatsCloudTest extends SolrCloudTestCase {
 
   public static void setupCluster() throws Exception {
     configureCluster(4)
-        .addConfig("conf", getFile("solr").toPath().resolve("configsets").resolve("cloud-analytics").resolve("conf"))
+        .addConfig("conf", configset("cloud-analytics"))
         .configure();
 
     CollectionAdminRequest.createCollection(COLLECTIONORALIAS, "conf", 2, 1).process(cluster.getSolrClient());

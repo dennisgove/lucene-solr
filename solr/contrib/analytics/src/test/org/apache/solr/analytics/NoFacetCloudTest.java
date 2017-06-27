@@ -114,11 +114,7 @@ public class NoFacetCloudTest extends AbstractAnalyticsStatsCloudTest {
         fields.add("string_sd"); fields.add(s);
         stringTestStart.add(s);
       } else stringMissing++;
-      
-      fields.add("int_i"); fields.add("" + i);
-      fields.add("long_l"); fields.add("" + l);
-      fields.add("float_f"); fields.add("" + f);
-      fields.add("double_d"); fields.add("" + d);
+
       req.add(fields.toArray(new String[0]));
     }
     req.commit(cluster.getSolrClient(), COLLECTIONORALIAS);
