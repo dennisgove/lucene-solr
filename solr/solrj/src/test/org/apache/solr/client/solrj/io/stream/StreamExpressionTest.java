@@ -35,7 +35,7 @@ import org.apache.solr.client.solrj.io.comp.ComparatorOrder;
 import org.apache.solr.client.solrj.io.comp.FieldComparator;
 import org.apache.solr.client.solrj.io.eval.AddEvaluator;
 import org.apache.solr.client.solrj.io.eval.AndEvaluator;
-import org.apache.solr.client.solrj.io.eval.EqualsEvaluator;
+import org.apache.solr.client.solrj.io.eval.EqualToEvaluator;
 import org.apache.solr.client.solrj.io.eval.GreaterThanEqualToEvaluator;
 import org.apache.solr.client.solrj.io.eval.GreaterThanEvaluator;
 import org.apache.solr.client.solrj.io.eval.IfThenElseEvaluator;
@@ -1091,7 +1091,7 @@ public class StreamExpressionTest extends SolrCloudTestCase {
         .withFunctionName("not", NotEvaluator.class)
         .withFunctionName("gt", GreaterThanEvaluator.class)
         .withFunctionName("lt", LessThanEvaluator.class)
-        .withFunctionName("eq", EqualsEvaluator.class)
+        .withFunctionName("eq", EqualToEvaluator.class)
         .withFunctionName("lteq", LessThanEqualToEvaluator.class)
         .withFunctionName("gteq", GreaterThanEqualToEvaluator.class);
 
@@ -1198,7 +1198,7 @@ public class StreamExpressionTest extends SolrCloudTestCase {
         .withFunctionName("not", NotEvaluator.class)
         .withFunctionName("gt", GreaterThanEvaluator.class)
         .withFunctionName("lt", LessThanEvaluator.class)
-        .withFunctionName("eq", EqualsEvaluator.class)
+        .withFunctionName("eq", EqualToEvaluator.class)
         .withFunctionName("lteq", LessThanEqualToEvaluator.class)
         .withFunctionName("gteq", GreaterThanEqualToEvaluator.class)
         .withFunctionName("val", RawValueEvaluator.class)
@@ -6252,13 +6252,13 @@ public class StreamExpressionTest extends SolrCloudTestCase {
     assertTrue(tuples.size() == 1);
     List<Number> convolution = (List<Number>)(tuples.get(0)).get("conv");
     assertTrue(convolution.size() == 7);
-    assertTrue(convolution.get(0).equals(20000D));
-    assertTrue(convolution.get(1).equals(20000D));
-    assertTrue(convolution.get(2).equals(25000D));
-    assertTrue(convolution.get(3).equals(30000D));
-    assertTrue(convolution.get(4).equals(15000D));
-    assertTrue(convolution.get(5).equals(10000D));
-    assertTrue(convolution.get(6).equals(5000D));
+    assertTrue(convolution.get(0).equals(20000L));
+    assertTrue(convolution.get(1).equals(20000L));
+    assertTrue(convolution.get(2).equals(25000L));
+    assertTrue(convolution.get(3).equals(30000L));
+    assertTrue(convolution.get(4).equals(15000L));
+    assertTrue(convolution.get(5).equals(10000L));
+    assertTrue(convolution.get(6).equals(5000L));
   }
 
 

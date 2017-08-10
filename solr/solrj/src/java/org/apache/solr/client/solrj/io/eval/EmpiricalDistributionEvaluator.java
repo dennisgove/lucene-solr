@@ -17,62 +17,68 @@
 package org.apache.solr.client.solrj.io.eval;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Arrays;
+import java.util.Map;
 
 import org.apache.commons.math3.random.EmpiricalDistribution;
 import org.apache.solr.client.solrj.io.Tuple;
-import org.apache.solr.client.solrj.io.stream.expr.Explanation;
-import org.apache.solr.client.solrj.io.stream.expr.Explanation.ExpressionType;
-import org.apache.solr.client.solrj.io.stream.expr.Expressible;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
-import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 
-public class EmpiricalDistributionEvaluator extends ComplexEvaluator implements Expressible {
-
-  private static final long serialVersionUID = 1;
-
-  public EmpiricalDistributionEvaluator(StreamExpression expression, StreamFactory factory) throws IOException {
+public class EmpiricalDistributionEvaluator extends RecursiveNumericEvaluator implements ManyValueWorker {
+  protected static final long serialVersionUID = 1L;
+  
+  public EmpiricalDistributionEvaluator(StreamExpression expression, StreamFactory factory) throws IOException{
     super(expression, factory);
     
-    if(1 != subEvaluators.size()){
-      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting one column but found %d",expression,subEvaluators.size()));
+    if(containedEvaluators.size() < 2){
+      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting at least two values but found %d",expression,containedEvaluators.size()));
     }
   }
 
-  public Object evaluate(Tuple tuple) throws IOException {
-
-    StreamEvaluator colEval1 = subEvaluators.get(0);
-
-    List<Number> numbers1 = (List<Number>)colEval1.evaluate(tuple);
-    double[] column1 = new double[numbers1.size()];
-
-    for(int i=0; i<numbers1.size(); i++) {
-      column1[i] = numbers1.get(i).doubleValue();
+  public Object normalizeInputType(Object value) throws StreamEvaluatorException {
+    Object normalized = super.normalizeInputType(value);
+    
+    if(null == normalized){
+      return null;
     }
+    else if(normalized instanceof BigDecimal){
+      return normalized;
+    }
+    else if(normalized instanceof Collection){
+      List<Object> flatList = new ArrayList<>();
+      for(Object subValue : (List)normalized){
+        if(subValue instanceof Collection){
+          flatList.addAll((Collection)normalizeInputType(subValue));
+        }
+        else{
+          flatList.add(normalizeInputType(subValue));
+        }
+      }
+      
+      return flatList;
+    }
+    else{
+      throw new StreamEvaluatorException("Numeric value expected but found type %s for value %s", value.getClass().getName(), value.toString());
+    }
+  }  
 
-    Arrays.sort(column1);
+  
+  @Override
+  public Object doWork(Object... values) throws IOException {
+    
     EmpiricalDistribution empiricalDistribution = new EmpiricalDistribution();
-    empiricalDistribution.load(column1);
+    
+    double[] backingValues = Arrays.stream(values).mapToDouble(value -> ((BigDecimal)value).doubleValue()).sorted().toArray();
+    empiricalDistribution.load(backingValues);
 
     return empiricalDistribution;
   }
-
-
-  @Override
-  public StreamExpressionParameter toExpression(StreamFactory factory) throws IOException {
-    StreamExpression expression = new StreamExpression(factory.getFunctionName(getClass()));
-    return expression;
-  }
-
-  @Override
-  public Explanation toExplanation(StreamFactory factory) throws IOException {
-    return new Explanation(nodeId.toString())
-        .withExpressionType(ExpressionType.EVALUATOR)
-        .withFunctionName(factory.getFunctionName(getClass()))
-        .withImplementingClass(getClass().getName())
-        .withExpression(toExpression(factory).toString());
-  }
 }
+

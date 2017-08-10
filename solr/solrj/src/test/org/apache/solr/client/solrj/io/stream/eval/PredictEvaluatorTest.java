@@ -14,23 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.solr.client.solrj.io.eval;
+package org.apache.solr.client.solrj.io.stream.eval;
 
-import java.util.UUID;
+import java.util.Map;
 
-import org.apache.solr.client.solrj.io.stream.StreamContext;
+import org.apache.directory.api.util.exception.NotImplementedException;
+import org.apache.lucene.util.LuceneTestCase;
+import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
+import org.junit.Test;
 
-public abstract class SimpleEvaluator implements StreamEvaluator {
-  private static final long serialVersionUID = 1L;
+public class PredictEvaluatorTest extends LuceneTestCase {
+
+  StreamFactory factory;
+  Map<String, Object> values;
   
-  protected UUID nodeId = UUID.randomUUID();
-  protected StreamContext streamContext;
-
-  public void setStreamContext(StreamContext streamContext) {
-    this.streamContext = streamContext;
+  public PredictEvaluatorTest() {
+    super();
   }
-  public StreamContext getStreamContext(){
-    return streamContext;
+  
+  @Test
+  public void noImplTest(){
+    throw new NotImplementedException();
   }
-
+    
 }

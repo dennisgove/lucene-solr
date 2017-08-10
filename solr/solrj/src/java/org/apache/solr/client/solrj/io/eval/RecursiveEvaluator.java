@@ -17,6 +17,8 @@
 package org.apache.solr.client.solrj.io.eval;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -24,6 +26,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.solr.client.solrj.io.Tuple;
 import org.apache.solr.client.solrj.io.stream.StreamContext;
 import org.apache.solr.client.solrj.io.stream.expr.Explanation;
 import org.apache.solr.client.solrj.io.stream.expr.Explanation.ExpressionType;
@@ -32,21 +35,63 @@ import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionParameter;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpressionValue;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 
-public abstract class ComplexEvaluator implements StreamEvaluator {
+public abstract class RecursiveEvaluator implements StreamEvaluator, ValueWorker {
   protected static final long serialVersionUID = 1L;
   protected StreamContext streamContext;
   
   protected UUID nodeId = UUID.randomUUID();
   
   protected StreamFactory constructingFactory;
-  protected List<StreamEvaluator> subEvaluators = new ArrayList<StreamEvaluator>();
   
-  public ComplexEvaluator(StreamExpression expression, StreamFactory factory) throws IOException{
+  protected List<StreamEvaluator> containedEvaluators = new ArrayList<StreamEvaluator>();
+  
+  public RecursiveEvaluator(StreamExpression expression, StreamFactory factory) throws IOException{
     this(expression, factory, new ArrayList<>());
   }
   
-  public ComplexEvaluator(StreamExpression expression, StreamFactory factory, List<String> ignoredNamedParameters) throws IOException{
-    constructingFactory = factory;
+  protected abstract Object normalizeInputType(Object value) throws IOException;
+  
+  protected Object normalizeOutputType(Object value) {
+    if(null == value){
+      return null;
+    }
+    else if(value instanceof BigDecimal){
+      BigDecimal bd = (BigDecimal)value;
+      if(bd.signum() == 0 || bd.scale() <= 0 || bd.stripTrailingZeros().scale() <= 0){
+        try{
+          return bd.longValueExact();
+        }
+        catch(ArithmeticException e){
+          // value was too big for a long, so use a double which can handle scientific notation
+        }
+      }
+      
+      return bd.doubleValue();
+    }
+    else if(value instanceof Double){
+      if(Double.isNaN((Double)value)){
+        return value;
+      }
+      
+      // could be a long so recurse back in as a BigDecimal
+      return normalizeOutputType(new BigDecimal((Double)value));
+    }
+    else if(value instanceof Number){
+      return normalizeOutputType(new BigDecimal(((Number)value).toString()));
+    }
+    else if(value instanceof List){
+      // normalize each value in the list
+      return ((List<?>)value).stream().map(innerValue -> normalizeOutputType(innerValue)).collect(Collectors.toList());
+    }
+    else{
+      // anything else can just be returned as is
+      return value;
+    }
+
+  }
+    
+  public RecursiveEvaluator(StreamExpression expression, StreamFactory factory, List<String> ignoredNamedParameters) throws IOException{
+    this.constructingFactory = factory;
     
     // We have to do this because order of the parameters matter
     List<StreamExpressionParameter> parameters = factory.getOperandsOfType(expression, StreamExpressionParameter.class);
@@ -55,15 +100,15 @@ public abstract class ComplexEvaluator implements StreamEvaluator {
       if(parameter instanceof StreamExpression){
         // possible evaluator
         StreamExpression streamExpression = (StreamExpression)parameter;
-        if(factory.doesRepresentTypes(streamExpression, ComplexEvaluator.class)){
-          subEvaluators.add(factory.constructEvaluator(streamExpression));
+        if(factory.doesRepresentTypes(streamExpression, RecursiveEvaluator.class)){
+          containedEvaluators.add(factory.constructEvaluator(streamExpression));
         }
-        else if(factory.doesRepresentTypes(streamExpression, SimpleEvaluator.class)){
-          subEvaluators.add(factory.constructEvaluator(streamExpression));
+        else if(factory.doesRepresentTypes(streamExpression, SourceEvaluator.class)){
+          containedEvaluators.add(factory.constructEvaluator(streamExpression));
         }
         else{
           // Will be treated as a field name
-          subEvaluators.add(new FieldEvaluator(streamExpression.toString()));
+          containedEvaluators.add(new FieldValueEvaluator(streamExpression.toString()));
         }
       }
       else if(parameter instanceof StreamExpressionValue){
@@ -72,10 +117,10 @@ public abstract class ComplexEvaluator implements StreamEvaluator {
           // as a RawValueEvaluator
           Object value = factory.constructPrimitiveObject(((StreamExpressionValue)parameter).getValue());
           if(null == value || value instanceof Boolean || value instanceof Number){
-            subEvaluators.add(new RawValueEvaluator(value));
+            containedEvaluators.add(new RawValueEvaluator(value));
           }
           else if(value instanceof String){
-            subEvaluators.add(new FieldEvaluator((String)value));
+            containedEvaluators.add(new FieldValueEvaluator((String)value));
           }
         }
       }
@@ -84,7 +129,7 @@ public abstract class ComplexEvaluator implements StreamEvaluator {
     Set<String> namedParameters = factory.getNamedOperands(expression).stream().map(param -> param.getName()).collect(Collectors.toSet());
     long ignorableCount = ignoredNamedParameters.stream().filter(name -> namedParameters.contains(name)).count();
     
-    if(0 != expression.getParameters().size() - subEvaluators.size() - ignorableCount){
+    if(0 != expression.getParameters().size() - containedEvaluators.size() - ignorableCount){
       if(namedParameters.isEmpty()){
         throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - unknown operands found - expecting only StreamEvaluators or field names", expression));
       }
@@ -93,12 +138,39 @@ public abstract class ComplexEvaluator implements StreamEvaluator {
       }
     }
   }
+  
+  @Override
+  public Object evaluate(Tuple tuple) throws IOException {    
+    try{
+      List<Object> containedResults = recursivelyEvaluate(tuple);
+      // this needs to be treated as an array of objects when going into doWork(Object ... values)
+      return normalizeOutputType(doWork(containedResults.toArray()));
+    }
+    catch(UncheckedIOException e){
+      throw e.getCause();
+    }
+  }  
+
+  
+  public List<Object> recursivelyEvaluate(Tuple tuple) throws IOException {
+    List<Object> results = new ArrayList<>();
+    try{
+      for(StreamEvaluator containedEvaluator : containedEvaluators){
+        results.add(normalizeInputType(containedEvaluator.evaluate(tuple)));
+      }
+    }
+    catch(StreamEvaluatorException e){
+      throw new IOException(String.format(Locale.ROOT, "Failed to evaluate expression %s - %s", toExpression(constructingFactory), e.getMessage()), e);
+    }
+    
+    return results;
+  }
 
   @Override
   public StreamExpressionParameter toExpression(StreamFactory factory) throws IOException {
     StreamExpression expression = new StreamExpression(factory.getFunctionName(getClass()));
     
-    for(StreamEvaluator evaluator : subEvaluators){
+    for(StreamEvaluator evaluator : containedEvaluators){
       expression.addParameter(evaluator.toExpression(factory));
     }
     return expression;
@@ -116,8 +188,8 @@ public abstract class ComplexEvaluator implements StreamEvaluator {
   public void setStreamContext(StreamContext context) {
     this.streamContext = context;
     
-    for(StreamEvaluator subEvaluator : subEvaluators){
-      subEvaluator.setStreamContext(context);
+    for(StreamEvaluator containedEvaluator : containedEvaluators){
+      containedEvaluator.setStreamContext(context);
     }
   }
   public StreamContext getStreamContext(){
