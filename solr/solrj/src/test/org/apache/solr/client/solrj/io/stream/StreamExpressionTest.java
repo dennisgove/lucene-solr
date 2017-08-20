@@ -5717,17 +5717,11 @@ public class StreamExpressionTest extends SolrCloudTestCase {
     List<Tuple> tuples = getTuples(solrStream);
     assertTrue(tuples.size() == 1);
     List<Number> copy1 = (List<Number>)tuples.get(0).get("copy1");
-    assertTrue(copy1.size() == 10);
+    assertTrue(copy1.size() == 4);
     assertTrue(copy1.get(0).doubleValue() == 100D);
     assertTrue(copy1.get(1).doubleValue() == 500D);
     assertTrue(copy1.get(2).doubleValue() == 300D);
     assertTrue(copy1.get(3).doubleValue() == 400D);
-    assertTrue(copy1.get(4).doubleValue() == 0D);
-    assertTrue(copy1.get(5).doubleValue() == 0D);
-    assertTrue(copy1.get(6).doubleValue() == 0D);
-    assertTrue(copy1.get(7).doubleValue() == 0D);
-    assertTrue(copy1.get(8).doubleValue() == 0D);
-    assertTrue(copy1.get(9).doubleValue() == 0D);
 
     List<Number> copy2 = (List<Number>)tuples.get(0).get("copy2");
     assertTrue(copy2.size() == 4);

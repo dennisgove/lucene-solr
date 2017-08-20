@@ -36,8 +36,8 @@ public class AnovaEvaluator extends RecursiveNumericListEvaluator implements Man
   public AnovaEvaluator(StreamExpression expression, StreamFactory factory) throws IOException{
     super(expression, factory);
     
-    if(containedEvaluators.size() < 2){
-      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting at least two values but found %d",expression,containedEvaluators.size()));
+    if(containedEvaluators.size() < 1){
+      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting at least one value but found %d",expression,containedEvaluators.size()));
     }
   }
 

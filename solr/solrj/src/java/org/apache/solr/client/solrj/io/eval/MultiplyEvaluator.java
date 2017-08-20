@@ -31,8 +31,8 @@ public class MultiplyEvaluator extends RecursiveNumericEvaluator implements Many
   public MultiplyEvaluator(StreamExpression expression, StreamFactory factory) throws IOException{
     super(expression, factory);
     
-    if(containedEvaluators.size() < 2){
-      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting at least two values but found %d",expression,containedEvaluators.size()));
+    if(containedEvaluators.size() < 1){
+      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting at least one value but found %d",expression,containedEvaluators.size()));
     }
   }
 
@@ -46,9 +46,9 @@ public class MultiplyEvaluator extends RecursiveNumericEvaluator implements Many
       return null;
     }
     
-    BigDecimal result = (BigDecimal)values[0];
-    for(int idx = 1; idx < values.length; ++idx){
-      result = multiply(result, values[idx]);
+    BigDecimal result = BigDecimal.ONE;
+    for(Object value : values){
+      result = multiply(result, value);
     }
     
     return result;
@@ -65,7 +65,7 @@ public class MultiplyEvaluator extends RecursiveNumericEvaluator implements Many
       return multiply(left, new BigDecimal(right.toString()));
     }
     else if(right instanceof List){
-      return multiply(left, doWork((List<?>)right));
+      return multiply(left, doWork(((List<?>)right).toArray()));
     }
     else{
       throw new StreamEvaluatorException("Numeric value expected but found type %s for value %s", right.getClass().getName(), right.toString());

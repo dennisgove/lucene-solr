@@ -150,7 +150,6 @@ public abstract class RecursiveEvaluator implements StreamEvaluator, ValueWorker
       throw e.getCause();
     }
   }  
-
   
   public List<Object> recursivelyEvaluate(Tuple tuple) throws IOException {
     List<Object> results = new ArrayList<>();

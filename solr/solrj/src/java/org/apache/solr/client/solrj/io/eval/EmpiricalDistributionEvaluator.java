@@ -18,9 +18,7 @@ package org.apache.solr.client.solrj.io.eval;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -31,51 +29,27 @@ import org.apache.solr.client.solrj.io.Tuple;
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
 
-public class EmpiricalDistributionEvaluator extends RecursiveNumericEvaluator implements ManyValueWorker {
+public class EmpiricalDistributionEvaluator extends RecursiveNumericEvaluator implements OneValueWorker {
   protected static final long serialVersionUID = 1L;
   
   public EmpiricalDistributionEvaluator(StreamExpression expression, StreamFactory factory) throws IOException{
     super(expression, factory);
     
-    if(containedEvaluators.size() < 2){
-      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting at least two values but found %d",expression,containedEvaluators.size()));
+    if(1 != containedEvaluators.size()){
+      throw new IOException(String.format(Locale.ROOT,"Invalid expression %s - expecting exactly one value but found %d",expression,containedEvaluators.size()));
     }
   }
-
-  public Object normalizeInputType(Object value) throws StreamEvaluatorException {
-    Object normalized = super.normalizeInputType(value);
-    
-    if(null == normalized){
-      return null;
-    }
-    else if(normalized instanceof BigDecimal){
-      return normalized;
-    }
-    else if(normalized instanceof Collection){
-      List<Object> flatList = new ArrayList<>();
-      for(Object subValue : (List)normalized){
-        if(subValue instanceof Collection){
-          flatList.addAll((Collection)normalizeInputType(subValue));
-        }
-        else{
-          flatList.add(normalizeInputType(subValue));
-        }
-      }
-      
-      return flatList;
-    }
-    else{
-      throw new StreamEvaluatorException("Numeric value expected but found type %s for value %s", value.getClass().getName(), value.toString());
-    }
-  }  
-
   
   @Override
-  public Object doWork(Object... values) throws IOException {
-    
+  public Object doWork(Object value) throws IOException {
+
+    if(!(value instanceof List<?>)){
+      throw new StreamEvaluatorException("List value expected but found type %s for value %s", value.getClass().getName(), value.toString());
+    }
+
     EmpiricalDistribution empiricalDistribution = new EmpiricalDistribution();
     
-    double[] backingValues = Arrays.stream(values).mapToDouble(value -> ((BigDecimal)value).doubleValue()).sorted().toArray();
+    double[] backingValues = ((List<?>)value).stream().mapToDouble(innerValue -> ((BigDecimal)innerValue).doubleValue()).sorted().toArray();
     empiricalDistribution.load(backingValues);
 
     return empiricalDistribution;
