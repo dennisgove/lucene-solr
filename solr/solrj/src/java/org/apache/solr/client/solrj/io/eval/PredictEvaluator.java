@@ -17,9 +17,9 @@
 package org.apache.solr.client.solrj.io.eval;
 
 import java.io.IOException;
-import java.util.Locale;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
@@ -29,8 +29,6 @@ public class PredictEvaluator extends RecursiveObjectEvaluator implements TwoVal
   
   public PredictEvaluator(StreamExpression expression, StreamFactory factory) throws IOException{
     super(expression, factory);
-  }
-
   }
 
   @Override
@@ -56,9 +54,6 @@ public class PredictEvaluator extends RecursiveObjectEvaluator implements TwoVal
     else{
       return ((List<?>)second).stream().map(value -> regressedTuple.predict(((Number)value).doubleValue())).collect(Collectors.toList());
     }
-    Number predictOver = (Number)second;
-    
-    return regressedTuple.predict(predictOver.doubleValue());
   }
   
 }
