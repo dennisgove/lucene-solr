@@ -14,22 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.solr.client.solrj.io.eval;
+package org.apache.solr.client.solrj.io.stream.eval;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 
-import org.apache.solr.client.solrj.io.stream.expr.StreamExpression;
+import org.apache.directory.api.util.exception.NotImplementedException;
+import org.apache.lucene.util.LuceneTestCase;
 import org.apache.solr.client.solrj.io.stream.expr.StreamFactory;
+import org.junit.Test;
 
-public abstract class RecursiveObjectEvaluator extends RecursiveEvaluator {
-  protected static final long serialVersionUID = 1L;
+public class KolmogorovSmirnovEvaluatorTest extends LuceneTestCase {
+
+  StreamFactory factory;
+  Map<String, Object> values;
   
-  public RecursiveObjectEvaluator(StreamExpression expression, StreamFactory factory) throws IOException{
-    super(expression, factory);
+  public KolmogorovSmirnovEvaluatorTest() {
+    super();
   }
   
-  public RecursiveObjectEvaluator(StreamExpression expression, StreamFactory factory, List<String> ignoredNamedParameters) throws IOException{
-    super(expression, factory, ignoredNamedParameters);
+  @Test
+  public void noImplTest(){
+    throw new NotImplementedException();
   }
+    
 }

@@ -49,7 +49,32 @@ public abstract class RecursiveEvaluator implements StreamEvaluator, ValueWorker
     this(expression, factory, new ArrayList<>());
   }
   
-  protected abstract Object normalizeInputType(Object value) throws IOException;
+  protected Object normalizeInputType(Object value){
+    if(null == value){
+      return null;
+    }
+    else if(value instanceof Double){
+      if(Double.isNaN((Double)value)){
+        return null;
+      }
+      return new BigDecimal(value.toString());
+    }
+    else if(value instanceof BigDecimal){
+      return (BigDecimal)value;
+    }
+    else if(value instanceof Number){
+      return new BigDecimal(value.toString());
+    }
+    else if(value instanceof List){
+      // normalize each value in the list
+      return ((List<?>)value).stream().map(innerValue -> normalizeInputType(innerValue)).collect(Collectors.toList());
+    }
+    else{
+      // anything else can just be returned as is
+      return value;
+    }
+
+  }
   
   protected Object normalizeOutputType(Object value) {
     if(null == value){
